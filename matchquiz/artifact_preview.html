@@ -1,0 +1,732 @@
+<title>Career Day Matchquiz</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: zelfde VEK-huisstijl als de partnersite (diepgroen + crème, Poppins).
+   Student: één vraag per scherm ("dit of dat"), daarna een top 5 met standnummers op het grondplan.
+   Bedrijf: één formulier met dezelfde vragen + live voorbeeld van de kaart die studenten zien.
+   Bewust één (lichte) look, zoals de partnersite: alle kleuren staan hieronder expliciet. */
+:root {
+  --green: #3C925E;
+  --green-dark: #1B4A33;
+  --green-deep: #163C2A;
+  --cream: #FFF6EC;
+  --white: #FFFFFF;
+  --sage: #D7E7D1;
+  --sage-soft: #EEF5EB;
+  --stub: #F3E6D6;
+  --ink: #1E271F;
+  --ink-muted: #5E6D5F;
+  --error: #A3361F;
+  --font: 'Poppins', system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { background: var(--cream); color: var(--ink); }
+body { font-family: var(--font); font-size: 15px; line-height: 1.55; margin: 0; }
+button, input, textarea, select { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--green); outline-offset: 2px; }
+a { color: var(--green-dark); }
+.wrap { max-width: 1100px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+/* ---------- hero ---------- */
+.hero { background: var(--green-deep); color: var(--cream); padding-block: 32px 40px; }
+.ticket { display: grid; grid-template-columns: 1fr auto; background: var(--cream); color: var(--ink); border-radius: 22px; position: relative; overflow: hidden; }
+.ticket-main { padding: 30px 34px; min-width: 0; }
+.eyebrow { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--green-dark); background: var(--sage); border-radius: 999px; padding: 5px 14px; }
+h1 { font-weight: 800; text-transform: uppercase; letter-spacing: -.01em; line-height: 1.02; color: var(--green-dark); font-size: clamp(32px, 5.5vw, 58px); margin: 14px 0 10px; text-wrap: balance; }
+.lead { font-size: 16.5px; font-weight: 500; color: var(--ink-muted); max-width: 58ch; margin: 0; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.chip { background: var(--white); border: 1.5px solid var(--sage); border-radius: 999px; padding: 5px 13px; font-size: 13.5px; font-weight: 700; color: var(--green-dark); }
+.stub { width: 190px; border-left: 2.5px dashed var(--sage); background: var(--stub); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 22px 16px; position: relative; }
+.stub::before, .stub::after { content: ""; position: absolute; left: -14px; width: 26px; height: 26px; border-radius: 50%; background: var(--green-deep); }
+.stub::before { top: -13px; } .stub::after { bottom: -13px; }
+.medal { width: 104px; height: 104px; border-radius: 50%; background: var(--green); color: var(--white); display: grid; place-items: center; font-weight: 800; font-size: 26px; box-shadow: 0 0 0 6px var(--sage); text-align: center; line-height: 1.05; }
+.stub small { font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--green-dark); text-align: center; }
+.btn { border: 0; background: var(--green); color: var(--white); border-radius: 999px; padding: 12px 26px; font-weight: 700; font-size: 15px; cursor: pointer; }
+.btn:hover { background: var(--green-dark); }
+.btn:disabled { background: #A9BDA9; cursor: not-allowed; }
+.btn.ghost { background: transparent; color: var(--green-dark); border: 1.5px solid var(--sage); }
+.btn.ghost:hover { background: var(--sage-soft); }
+.hero .actions { margin-top: 22px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.banner { margin: 0 0 16px; background: var(--stub); border: 1.5px dashed #D9C3A8; color: #6B5233; border-radius: 12px; padding: 9px 14px; font-size: 13.5px; }
+
+main { padding-block: 32px 64px; }
+.section-label { font-size: 12px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-muted); margin: 0 0 8px; }
+h2 { font-size: 22px; font-weight: 700; color: var(--green-dark); margin: 0 0 4px; text-wrap: balance; }
+.sub { color: var(--ink-muted); margin: 0 0 16px; font-size: 14px; }
+
+/* ---------- studentquiz ---------- */
+.quiz { max-width: 760px; margin: 0 auto; }
+.progress { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; font-size: 13px; font-weight: 600; color: var(--ink-muted); font-variant-numeric: tabular-nums; }
+.bar { flex: 1; height: 8px; border-radius: 99px; background: var(--sage); overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--green); border-radius: 99px; transition: width .25s; }
+.qcard { background: var(--white); border: 1.5px solid var(--sage); border-radius: 20px; padding: 28px; }
+.qcard h2 { font-size: clamp(20px, 3.4vw, 26px); margin-bottom: 4px; }
+.opts { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin-top: 18px; }
+.opt { text-align: left; border: 1.5px solid var(--sage); background: var(--white); border-radius: 14px; padding: 13px 16px; font-weight: 600; color: var(--green-dark); cursor: pointer; display: flex; gap: 10px; align-items: center; min-height: 52px; }
+.opt:hover { background: var(--sage-soft); }
+.opt[aria-pressed="true"] { background: var(--green-dark); border-color: var(--green-dark); color: var(--white); }
+.opt .box { flex: none; width: 18px; height: 18px; border-radius: 5px; border: 2px solid currentColor; display: grid; place-items: center; font-size: 12px; line-height: 1; }
+.opt.radio .box { border-radius: 50%; }
+.opt[aria-pressed="true"] .box::after { content: "✓"; }
+.opt.radio[aria-pressed="true"] .box::after { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.scale { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 14px; align-items: stretch; margin-top: 18px; }
+.pole { border-radius: 14px; background: var(--sage-soft); padding: 14px 16px; font-weight: 600; color: var(--green-dark); font-size: 14.5px; display: flex; align-items: center; }
+.pole.r { justify-content: flex-end; text-align: right; }
+.dots { display: flex; gap: 8px; align-items: center; }
+.dot { width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--green); background: var(--white); cursor: pointer; padding: 0; display: grid; place-items: center; }
+.dot.s1, .dot.s5 { width: 44px; height: 44px; }
+.dot.s2, .dot.s4 { width: 34px; height: 34px; }
+.dot.s3 { width: 26px; height: 26px; }
+.dot:hover { background: var(--sage); }
+.dot[aria-pressed="true"] { background: var(--green-dark); border-color: var(--green-dark); }
+.scale-hint { display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-muted); margin-top: 10px; }
+.qnav { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 22px; }
+.qnav .count { font-size: 13px; color: var(--ink-muted); }
+
+/* ---------- resultaten ---------- */
+.res-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; align-items: end; margin-bottom: 16px; }
+.res-grid { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 24px; align-items: start; }
+.matches { display: grid; gap: 12px; }
+.match { background: var(--white); border: 1.5px solid var(--sage); border-radius: 18px; display: grid; grid-template-columns: 74px minmax(0, 1fr); overflow: hidden; }
+.match .side { background: var(--green-deep); color: var(--cream); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 12px 6px; border-right: 2.5px dashed var(--green); }
+.match .side .rk { font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--sage); }
+.match .side .pct { font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.match .body { padding: 14px 18px; min-width: 0; }
+.match .top { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.match h3 { margin: 0; font-size: 18px; color: var(--green-dark); }
+.standtag { font-size: 12.5px; font-weight: 700; color: var(--white); background: var(--green); border-radius: 999px; padding: 3px 11px; white-space: nowrap; }
+.standtag.none { background: var(--sage); color: var(--green-dark); }
+.match p { margin: 4px 0 8px; color: var(--ink-muted); font-size: 14px; }
+.why { margin: 0; padding: 0; list-style: none; display: grid; gap: 3px; font-size: 13.5px; }
+.why li::before { content: "✓"; color: var(--green); font-weight: 800; margin-right: 8px; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.tag { font-size: 12px; font-weight: 600; color: var(--green-dark); background: var(--sage-soft); border-radius: 999px; padding: 2px 10px; }
+.mapbox { background: var(--white); border: 1.5px solid var(--sage); border-radius: 18px; padding: 14px; position: sticky; top: calc(16px + env(safe-area-inset-top, 0px)); }
+.mapbox h3 { margin: 0 0 2px; font-size: 16px; color: var(--green-dark); }
+.mapbox .sub { margin-bottom: 10px; }
+svg.plan { display: block; width: 100%; height: auto; }
+.tent { fill: #FBFDF9; stroke: var(--green-dark); stroke-width: .25; }
+.gang { fill: var(--sage-soft); }
+.st { fill: var(--white); stroke: #B9CDB3; stroke-width: .12; }
+.st.hit { fill: var(--green); stroke: var(--green-deep); stroke-width: .2; }
+.pin circle { fill: var(--green-deep); stroke: var(--white); stroke-width: .25; }
+.pin text { font-size: 1.9px; font-weight: 800; fill: var(--white); text-anchor: middle; dominant-baseline: central; }
+.tl { font-size: 1.8px; font-weight: 800; fill: var(--green-dark); letter-spacing: .1em; }
+.door { fill: var(--green); }
+.doorlbl { font-size: 1.5px; font-weight: 700; fill: var(--green); }
+.route { margin: 10px 0 0; padding: 0; list-style: none; font-size: 13.5px; display: grid; gap: 4px; }
+.route b { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--green-deep); color: var(--white); font-size: 11.5px; margin-right: 8px; }
+details.all { margin-top: 20px; background: var(--white); border: 1.5px solid var(--sage); border-radius: 16px; padding: 4px 18px; }
+details.all summary { cursor: pointer; font-weight: 700; color: var(--green-dark); padding: 12px 0; }
+.alllist { list-style: none; margin: 0 0 12px; padding: 0; }
+.alllist li { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; gap: 10px; padding: 8px 0; border-top: 1px solid var(--sage-soft); font-size: 14px; align-items: center; }
+.alllist .p { font-weight: 800; color: var(--green-dark); font-variant-numeric: tabular-nums; }
+.alllist .s { color: var(--ink-muted); font-size: 13px; white-space: nowrap; }
+.empty { background: var(--white); border: 1.5px dashed var(--sage); border-radius: 18px; padding: 24px; color: var(--ink-muted); }
+
+/* ---------- bedrijfsformulier ---------- */
+.form-grid { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 28px; align-items: start; }
+fieldset { border: 1.5px solid var(--sage); background: var(--white); border-radius: 18px; padding: 22px; margin: 0 0 16px; min-width: 0; }
+legend { font-weight: 700; color: var(--green-dark); font-size: 17px; padding: 0 8px; }
+.fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.field { display: grid; gap: 5px; min-width: 0; }
+.field.wide { grid-column: 1 / -1; }
+label, .lbl { font-size: 13.5px; font-weight: 600; color: var(--green-dark); }
+.field small { color: var(--ink-muted); font-size: 12.5px; }
+input[type=text], input[type=email], input[type=url], input[type=number], textarea { width: 100%; border: 1.5px solid var(--sage); border-radius: 10px; padding: 10px 12px; background: var(--white); }
+textarea { resize: vertical; min-height: 76px; }
+input:focus, textarea:focus { border-color: var(--green); outline: none; }
+.q { padding: 16px 0; border-top: 1px solid var(--sage-soft); }
+.q:first-of-type { border-top: 0; padding-top: 4px; }
+.q .lbl { display: block; font-size: 15px; }
+.q .help { display: block; color: var(--ink-muted); font-size: 13px; margin-top: 2px; }
+.q .opts { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; margin-top: 10px; }
+.q .opt { min-height: 44px; padding: 9px 12px; font-size: 14px; }
+.q .scale { margin-top: 10px; }
+.q .pole { font-size: 13.5px; padding: 10px 12px; }
+.q .dot.s1, .q .dot.s5 { width: 38px; height: 38px; }
+.q .dot.s2, .q .dot.s4 { width: 30px; height: 30px; }
+.q .dot.s3 { width: 22px; height: 22px; }
+.err { color: var(--error); font-size: 13px; font-weight: 600; }
+.q.bad .lbl, .field.bad label { color: var(--error); }
+.field.bad input { border-color: var(--error); }
+.preview { position: sticky; top: calc(16px + env(safe-area-inset-top, 0px)); }
+.send { background: var(--white); border: 1.5px solid var(--sage); border-radius: 18px; padding: 18px; margin-top: 14px; }
+.send .btn { width: 100%; }
+.send p { font-size: 13px; color: var(--ink-muted); margin: 10px 0 0; }
+.done { background: var(--sage-soft); border: 1.5px solid var(--green); border-radius: 18px; padding: 20px; }
+.done h2 { margin-bottom: 6px; }
+.done pre { white-space: pre-wrap; background: var(--white); border-radius: 10px; padding: 12px; font-size: 12.5px; max-height: 260px; overflow: auto; }
+.hp { position: absolute; left: -9999px; }
+
+footer { background: var(--green-deep); color: var(--sage); font-size: 13px; padding-block: 20px; }
+footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+footer a { color: var(--cream); font-weight: 600; }
+
+@media (max-width: 940px) {
+  .res-grid, .form-grid { grid-template-columns: minmax(0, 1fr); }
+  .mapbox, .preview { position: static; }
+}
+@media (max-width: 640px) {
+  .ticket { grid-template-columns: 1fr; }
+  .stub { width: auto; flex-direction: row; border-left: 0; border-top: 2.5px dashed var(--sage); padding: 14px; }
+  .stub::before, .stub::after { top: -14px; left: auto; }
+  .stub::before { left: -13px; } .stub::after { right: -13px; bottom: auto; }
+  .medal { width: 62px; height: 62px; font-size: 15px; box-shadow: 0 0 0 4px var(--sage); }
+  .ticket-main { padding: 24px 20px; }
+  .qcard { padding: 20px 16px; }
+  .scale { grid-template-columns: minmax(0, 1fr); }
+  .pole.r { justify-content: flex-start; text-align: left; }
+  .dots { justify-content: space-between; order: 0; }
+  .fields { grid-template-columns: minmax(0, 1fr); }
+  fieldset { padding: 16px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<!-- ===================== STUDENT ===================== -->
+<div id="student" hidden>
+  <header class="hero">
+    <div class="wrap">
+      <div class="ticket">
+        <div class="ticket-main">
+          <span class="eyebrow">Matchquiz · <span class="ed"></span></span>
+          <h1>Welk bedrijf past bij jou?</h1>
+          <p class="lead">Beantwoord 11 korte vragen en je krijgt je persoonlijke top 5 van de bedrijven op de Career Day, met hun standnummer en een route door de tenten.</p>
+          <div class="actions">
+            <button class="btn" id="start" type="button">Start de quiz</button>
+            <span class="chip">± 2 minuten</span>
+            <span class="chip" id="aantalBedrijven">Bedrijven laden…</span>
+          </div>
+        </div>
+        <div class="stub" aria-hidden="true">
+          <div class="medal">TOP<br>5</div>
+          <small>Jouw matches</small>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <p class="banner" id="demoBannerS" hidden>Demomodus: je ziet verzonnen voorbeeldbedrijven. Zodra de bedrijven hun profiel invullen, verschijnen hier de echte deelnemers.</p>
+    <section class="quiz" id="quiz" hidden aria-live="polite">
+      <div class="progress"><span id="qnr">Vraag 1 van 11</span><div class="bar"><i id="qbar" style="width:0%"></i></div></div>
+      <div class="qcard" id="qcard"></div>
+    </section>
+
+    <section id="intro">
+      <p class="section-label">Hoe werkt het?</p>
+      <h2>Bedrijven vulden dezelfde vragen in</h2>
+      <p class="sub" style="max-width:64ch">Wat jij zoekt, in welk domein, en hoe je graag werkt: we leggen jouw antwoorden naast het profiel van elk bedrijf. Wat ze aanbieden en het domein wegen het zwaarst, daarna de werksfeer. Er zijn geen foute antwoorden.</p>
+    </section>
+
+    <section id="results" hidden>
+      <div class="res-head">
+        <div>
+          <p class="section-label">Jouw resultaat</p>
+          <h2>Je top 5 op de Career Day</h2>
+        </div>
+        <button class="btn ghost" id="opnieuw" type="button">Quiz opnieuw doen</button>
+      </div>
+      <div class="res-grid">
+        <div>
+          <div class="matches" id="matches"></div>
+          <details class="all" id="allWrap">
+            <summary id="allSum">Alle bedrijven gerangschikt</summary>
+            <ul class="alllist" id="allList"></ul>
+          </details>
+        </div>
+        <aside class="mapbox" id="mapbox">
+          <h3>Jouw route</h3>
+          <p class="sub">Je top 5 op het grondplan. Neem een screenshot voor op de dag zelf.</p>
+          <svg class="plan" id="plan" viewBox="-4 -3 98 48" role="img" aria-label="Grondplan met je top 5 standen"></svg>
+          <ol class="route" id="route"></ol>
+        </aside>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ===================== BEDRIJF ===================== -->
+<div id="bedrijf" hidden>
+  <header class="hero">
+    <div class="wrap">
+      <div class="ticket">
+        <div class="ticket-main">
+          <span class="eyebrow">Bedrijfsprofiel · <span class="ed"></span></span>
+          <h1>Laat de juiste studenten jullie vinden</h1>
+          <p class="lead">Studenten doen op de Career Day een korte matchquiz. Vul hier dezelfde vragen in voor jullie bedrijf, dan sturen we de studenten die het best bij jullie passen naar jullie stand.</p>
+          <div class="chips" id="bchips">
+            <span class="chip">± 5 minuten</span>
+            <span class="chip">Aanpassen kan altijd: opnieuw versturen overschrijft</span>
+          </div>
+        </div>
+        <div class="stub" aria-hidden="true">
+          <div class="medal">MATCH</div>
+          <small>Bedrijf × student</small>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <p class="banner" id="demoBannerB" hidden>Demomodus: dit formulier is nog niet gekoppeld aan de Google Sheet. Na het versturen krijg je een samenvatting om te kopiëren.</p>
+    <form id="bform" novalidate>
+      <div class="form-grid">
+        <div>
+          <fieldset>
+            <legend>Jullie gegevens</legend>
+            <div class="fields">
+              <div class="field"><label for="b_naam">Bedrijfsnaam *</label><input type="text" id="b_naam" maxlength="80" autocomplete="organization"></div>
+              <div class="field"><label for="b_stand">Standnummer</label><input type="number" id="b_stand" min="1" max="128" inputmode="numeric"><small>Als je het al weet (1–128). Wij kunnen het ook aanvullen.</small></div>
+              <div class="field"><label for="b_contact">Contactpersoon *</label><input type="text" id="b_contact" maxlength="80" autocomplete="name"></div>
+              <div class="field"><label for="b_email">E-mail *</label><input type="email" id="b_email" maxlength="120" autocomplete="email"><small>Enkel voor de organisatie, niet zichtbaar voor studenten.</small></div>
+              <div class="field wide"><label for="b_web">Website of vacaturepagina</label><input type="url" id="b_web" maxlength="200" placeholder="https://"></div>
+              <div class="field wide"><label for="b_pitch">Jullie pitch in één zin *</label><textarea id="b_pitch" maxlength="160" placeholder="Wat maakt jullie interessant voor een student?"></textarea><small id="pitchCount">0 / 160 tekens · dit zien studenten bij hun match</small></div>
+              <div class="field wide" id="codeField" hidden><label for="b_code">Toegangscode *</label><input type="text" id="b_code" maxlength="40" autocomplete="off"><small>Staat in de mail van VEK Recruitment.</small></div>
+            </div>
+            <input class="hp" type="text" id="b_website2" tabindex="-1" autocomplete="off" aria-hidden="true">
+          </fieldset>
+          <fieldset>
+            <legend>Wat zoeken jullie?</legend>
+            <div id="bq_wat"></div>
+          </fieldset>
+          <fieldset>
+            <legend>Hoe is het om bij jullie te werken?</legend>
+            <p class="sub">Kies telkens het bolletje dat het best bij jullie team past. Het midden betekent: allebei evenveel.</p>
+            <div id="bq_sfeer"></div>
+          </fieldset>
+        </div>
+        <aside class="preview">
+          <p class="section-label">Zo zien studenten jullie</p>
+          <div id="bpreview"></div>
+          <div class="send">
+            <p class="err" id="berr" hidden></p>
+            <button class="btn" id="bsend" type="submit">Profiel versturen</button>
+            <p>Zelfde bedrijfsnaam opnieuw versturen = jullie profiel wordt bijgewerkt.</p>
+          </div>
+        </aside>
+      </div>
+    </form>
+    <section class="done" id="bdone" hidden>
+      <h2 id="bdoneTitel">Bedankt, jullie profiel staat erin!</h2>
+      <p id="bdoneTekst">Studenten die de quiz doen, krijgen jullie te zien als jullie bij hen passen. Iets aanpassen? Vul het formulier opnieuw in met dezelfde bedrijfsnaam.</p>
+      <pre id="bdonePre" hidden></pre>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+        <button class="btn" type="button" id="bcopy" hidden>Kopieer samenvatting</button>
+        <button class="btn ghost" type="button" id="bedit">Profiel aanpassen</button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<footer><div class="wrap"><span>VEK Recruitment · Career Day · Matchquiz</span><span id="switch"></span></div></footer>
+
+<script>
+/* =====================================================================
+   INSTELLINGEN – pas hier aan en draai daarna `python3 bouw_quiz.py`
+   ===================================================================== */
+const CONFIG = {
+  ENDPOINT: "",                 // URL van de Google Apps Script web-app (zie README). Leeg = demomodus
+  EDITIE: "Career Day 26–27",
+  CODE_VRAGEN: false,           // true = bedrijven moeten een toegangscode invullen (zet ook BEDRIJFSCODE in Code.gs)
+  LOG_STUDENTEN: true,          // anoniem bijhouden welke bedrijven studenten als match kregen (tabblad Studenten)
+  TOP: 5
+};
+const STANDEN = [[1,27.35,22.26,3.0,2.0],[2,30.57,22.37,3.0,2.0],[3,33.98,26.21,2.0,3.0],[4,33.98,29.5,2.0,3.0],[5,33.98,32.8,2.0,3.0],[6,28.6,28.49,2.0,3.0],[7,28.6,31.78,2.0,3.0],[8,28.6,35.09,2.0,3.0],[9,31.33,39.73,3.0,2.0],[10,34.7,39.73,3.0,2.0],[11,37.7,39.71,3.0,2.0],[12,41.0,35.0,2.0,3.0],[13,41.0,31.7,2.0,3.0],[14,41.0,28.41,2.0,3.0],[15,35.97,32.8,2.0,3.0],[16,35.97,29.5,2.0,3.0],[17,35.97,26.21,2.0,3.0],[18,38.47,22.31,3.0,2.0],[19,41.47,22.31,3.0,2.0],[20,44.47,22.29,3.0,2.0],[21,47.97,26.21,2.0,3.0],[22,47.97,29.5,2.0,3.0],[23,47.97,32.8,2.0,3.0],[24,42.99,28.41,2.0,3.0],[25,42.99,31.7,2.0,3.0],[26,42.99,35.0,2.0,3.0],[27,45.47,39.73,3.0,2.0],[28,48.57,39.73,3.0,2.0],[29,51.57,39.71,3.0,2.0],[30,54.97,35.99,2.0,3.0],[31,54.97,32.7,2.0,3.0],[32,54.97,29.41,2.0,3.0],[33,49.96,32.8,2.0,3.0],[34,49.96,29.5,2.0,3.0],[35,49.96,26.21,2.0,3.0],[36,52.38,23.23,3.0,2.0],[37,55.52,23.23,3.0,2.0],[38,58.55,23.29,3.0,2.0],[39,61.94,26.21,2.0,3.0],[40,61.94,29.5,2.0,3.0],[41,61.94,32.8,2.0,3.0],[42,56.96,29.41,2.0,3.0],[43,56.96,32.7,2.0,3.0],[44,56.96,35.99,2.0,3.0],[45,59.46,39.73,3.0,2.0],[46,62.56,39.73,3.0,2.0],[47,65.56,39.71,3.0,2.0],[48,68.96,35.0,2.0,3.0],[49,68.96,31.7,2.0,3.0],[50,68.96,28.41,2.0,3.0],[51,63.95,32.8,2.0,3.0],[52,63.95,29.5,2.0,3.0],[53,63.95,26.21,2.0,3.0],[54,66.37,22.26,3.0,2.0],[55,69.47,22.26,3.0,2.0],[56,72.47,22.29,3.0,2.0],[57,76.46,26.21,2.0,3.0],[58,76.46,29.5,2.0,3.0],[59,76.46,32.8,2.0,3.0],[60,70.95,28.41,2.0,3.0],[61,70.95,31.7,2.0,3.0],[62,70.95,35.0,2.0,3.0],[63,73.49,39.65,3.0,2.0],[64,76.54,39.71,3.0,2.0],[65,84.46,36.09,2.0,3.0],[66,84.46,32.8,2.0,3.0],[67,84.46,29.5,2.0,3.0],[68,84.46,26.21,2.0,3.0],[69,84.46,22.9,2.0,3.0],[70,78.44,32.8,2.0,3.0],[71,78.44,29.5,2.0,3.0],[72,78.44,26.21,2.0,3.0],[73,78.44,22.9,2.0,3.0],[74,78.44,16.09,2.0,3.0],[75,78.44,12.78,2.0,3.0],[76,78.44,9.5,2.0,3.0],[77,78.44,6.19,2.0,3.0],[78,84.46,16.09,2.0,3.0],[79,84.46,12.78,2.0,3.0],[80,84.46,9.5,2.0,3.0],[81,84.46,6.19,2.0,3.0],[82,84.46,2.9,2.0,3.0],[83,76.46,0.38,3.0,2.0],[84,73.32,0.36,3.0,2.0],[85,76.46,6.19,2.0,3.0],[86,76.46,9.5,2.0,3.0],[87,76.46,12.78,2.0,3.0],[88,70.95,3.99,2.0,3.0],[89,70.95,7.3,2.0,3.0],[90,70.95,10.61,2.0,3.0],[91,72.51,17.68,3.0,2.0],[92,69.51,17.7,3.0,2.0],[93,66.37,17.7,3.0,2.0],[94,63.95,12.78,2.0,3.0],[95,63.95,9.5,2.0,3.0],[96,63.95,6.19,2.0,3.0],[97,68.96,10.61,2.0,3.0],[98,68.96,7.3,2.0,3.0],[99,68.96,3.99,2.0,3.0],[100,65.48,0.3,3.0,2.0],[101,62.5,0.31,3.0,2.0],[102,59.36,0.31,3.0,2.0],[103,56.96,2.98,2.0,3.0],[104,56.96,6.29,2.0,3.0],[105,56.96,9.6,2.0,3.0],[106,61.94,6.19,2.0,3.0],[107,61.94,9.5,2.0,3.0],[108,61.94,12.78,2.0,3.0],[109,58.63,16.72,3.0,2.0],[110,55.63,16.77,3.0,2.0],[111,52.49,16.77,3.0,2.0],[112,49.96,12.78,2.0,3.0],[113,49.96,9.5,2.0,3.0],[114,49.96,6.19,2.0,3.0],[115,54.97,9.6,2.0,3.0],[116,54.97,6.29,2.0,3.0],[117,54.97,2.98,2.0,3.0],[118,51.64,0.3,3.0,2.0],[119,48.64,0.27,3.0,2.0],[120,45.53,0.27,3.0,2.0],[121,42.99,3.99,2.0,3.0],[122,42.99,7.3,2.0,3.0],[123,42.99,10.61,2.0,3.0],[124,47.97,6.19,2.0,3.0],[125,47.97,9.5,2.0,3.0],[126,47.97,12.78,2.0,3.0],[127,44.41,17.68,3.0,2.0],[128,41.3,17.7,3.0,2.0]];   // [nr, x, y, w, h, tent] – ingevuld door bouw_quiz.py
+const STANDAARD_MODUS = /*__MODUS__*/"student";
+
+/* =====================================================================
+   VRAGEN – gedeeld door student en bedrijf. Wijzig je hier iets, dan
+   past de quiz én het bedrijfsformulier zich aan.
+   ===================================================================== */
+const ZOEK = [["stage", "Stage"], ["job", "Starterjob"], ["trainee", "Traineeship"], ["studjob", "Studentenjob"], ["thesis", "Thesis of case"]];
+const RICHTING = [["econ", "Economie / TEW"], ["hw", "Handelswetenschappen"], ["hi", "Handelsingenieur"], ["bk", "Bedrijfskunde / bestuurskunde"], ["recht", "Rechten"], ["data", "Informatica / data"], ["ing", "Ingenieur"], ["ander", "Iets anders"]];
+const DOMEIN = [["finance", "Finance & banking"], ["audit", "Audit & accounting"], ["consult", "Consulting & strategie"], ["marketing", "Marketing & sales"], ["supply", "Supply chain & operations"], ["data", "Data, IT & analytics"], ["hr", "HR & people"], ["tax", "Tax & legal"], ["ondern", "Ondernemen & innovatie"]];
+const GROOTTE = [["startup", "Start-up / scale-up"], ["kmo", "KMO"], ["groot", "Groot Belgisch bedrijf"], ["multi", "Multinational"]];
+const LOCATIE = [["gent", "Gent"], ["brussel", "Brussel"], ["antwerpen", "Antwerpen"], ["vlaanderen", "Elders in België"], ["buitenland", "Buitenland"]];
+const WAARDEN = [["leren", "Leren & opleiding"], ["impact", "Impact & duurzaamheid"], ["loon", "Verloning & voordelen"], ["sfeer", "Sfeer & collega's"], ["groei", "Snel doorgroeien"], ["inter", "Internationale kansen"]];
+const SCHALEN = [
+  ["structuur", "Duidelijke structuur en vaste processen", "Veel vrijheid, zelf je weg zoeken"],
+  ["team", "Altijd samen in een team", "Zelfstandig aan eigen projecten"],
+  ["tempo", "Hoog tempo, uitdagende deadlines", "Rustig tempo, goede work-life balance"],
+  ["inter", "Internationaal, Engels als werktaal", "Lokaal verankerd, Nederlands"],
+  ["mensen", "Veel contact met klanten en mensen", "Analytisch werk achter de schermen"],
+  ["plek", "Vooral samen op kantoor", "Veel thuiswerk en flexibele uren"]
+];
+const EGAAL = ["egaal", "Maakt me niet uit"];
+
+/* type: multi | single | schaal.  max: max aantal keuzes (student). */
+const VRAGEN = [
+  { id: "zoek", type: "multi", opties: ZOEK,
+    s: { titel: "Wat zoek je op de Career Day?", help: "Kies alles wat past." },
+    b: { titel: "Wat bieden jullie studenten aan?", help: "Kies alles wat past.", verplicht: true } },
+  { id: "richting", opties: RICHTING,
+    s: { type: "single", titel: "Wat studeer je?", help: "" },
+    b: { type: "multi", titel: "Welke studierichtingen zoeken jullie?", help: "Geen voorkeur? Kies dan alles.", verplicht: true } },
+  { id: "domein", type: "multi", opties: DOMEIN,
+    s: { titel: "Welke domeinen spreken je aan?", help: "Kies er maximaal 3.", max: 3 },
+    b: { titel: "In welke domeinen werven jullie?", help: "Kies alles wat past.", verplicht: true } },
+  { id: "grootte", opties: GROOTTE,
+    s: { type: "single", titel: "Bij wat voor bedrijf zie je jezelf werken?", help: "", egaal: true },
+    b: { type: "single", titel: "Wat voor bedrijf zijn jullie?", help: "", verplicht: true } },
+  { id: "locatie", type: "multi", opties: LOCATIE,
+    s: { titel: "Waar wil je werken?", help: "Kies alles wat kan.", egaal: true },
+    b: { titel: "Waar kunnen starters bij jullie aan de slag?", help: "Kies alles wat past.", verplicht: true } },
+  ...SCHALEN.map(([id, l, r], i) => ({ id: "s_" + id, type: "schaal", links: l, rechts: r,
+    s: { titel: i === 0 ? "Wat past het best bij jou?" : "En hier?", help: "Kies een bolletje: hoe dichter, hoe meer het bij je past." },
+    b: { titel: "", help: "", verplicht: true } })),
+  { id: "waarden", type: "multi", opties: WAARDEN,
+    s: { titel: "Wat vind je het belangrijkst in je eerste job?", help: "Kies er 2.", max: 2, min: 2 },
+    b: { titel: "Waar blinken jullie in uit?", help: "Kies er 2.", max: 2, min: 2, verplicht: true } }
+];
+
+/* =====================================================================
+   VOORBEELDBEDRIJVEN (enkel in demomodus) – verzonnen
+   ===================================================================== */
+const DEMO = [
+  { naam: "Noordkaap Consulting", stand: 12, pitch: "Strategieconsultancy voor Belgische KMO's: vanaf dag één bij de klant.", website: "",
+    p: { zoek: ["stage", "job"], richting: ["econ", "hw", "hi", "bk"], domein: ["consult", "ondern"], grootte: "kmo", locatie: ["gent", "antwerpen"], s_structuur: 4, s_team: 2, s_tempo: 2, s_inter: 4, s_mensen: 1, s_plek: 2, waarden: ["leren", "groei"] } },
+  { naam: "Ledger & Lys", stand: 47, pitch: "Audit en advies met een uitgebouwde academy voor starters.", website: "",
+    p: { zoek: ["job", "trainee", "studjob"], richting: ["econ", "hw", "hi", "recht"], domein: ["audit", "tax"], grootte: "groot", locatie: ["gent", "brussel", "antwerpen", "vlaanderen"], s_structuur: 1, s_team: 2, s_tempo: 2, s_inter: 3, s_mensen: 2, s_plek: 3, waarden: ["leren", "loon"] } },
+  { naam: "Atrium Bank", stand: 3, pitch: "Graduate programme van twee jaar langs vier afdelingen van de bank.", website: "",
+    p: { zoek: ["trainee", "stage", "thesis"], richting: ["econ", "hw", "hi", "data", "ing"], domein: ["finance", "data"], grootte: "multi", locatie: ["brussel", "buitenland"], s_structuur: 2, s_team: 3, s_tempo: 2, s_inter: 1, s_mensen: 3, s_plek: 3, waarden: ["inter", "loon"] } },
+  { naam: "Viltrop", stand: 88, pitch: "Scale-up in duurzame verpakkingen. Kleine teams, veel verantwoordelijkheid.", website: "",
+    p: { zoek: ["stage", "job", "thesis"], richting: ["econ", "hi", "ing", "bk"], domein: ["supply", "ondern", "marketing"], grootte: "startup", locatie: ["gent"], s_structuur: 5, s_team: 2, s_tempo: 1, s_inter: 4, s_mensen: 3, s_plek: 4, waarden: ["impact", "groei"] } },
+  { naam: "Brandhuis", stand: 61, pitch: "Marketingbureau voor merken die durven: campagnes, data en content.", website: "",
+    p: { zoek: ["stage", "studjob", "job"], richting: ["econ", "hw", "bk", "ander"], domein: ["marketing", "data"], grootte: "kmo", locatie: ["antwerpen", "gent"], s_structuur: 4, s_team: 1, s_tempo: 2, s_inter: 4, s_mensen: 1, s_plek: 4, waarden: ["sfeer", "leren"] } },
+  { naam: "Halvemaan Logistics", stand: 104, pitch: "Supply chain voor de haven van Gent en Antwerpen, met een traineetraject.", website: "",
+    p: { zoek: ["trainee", "job", "stage"], richting: ["hi", "ing", "econ", "bk"], domein: ["supply", "data"], grootte: "groot", locatie: ["gent", "antwerpen"], s_structuur: 2, s_team: 2, s_tempo: 3, s_inter: 3, s_mensen: 4, s_plek: 2, waarden: ["leren", "groei"] } },
+  { naam: "Peerdata", stand: 33, pitch: "Data- en AI-projecten voor zorg en overheid.", website: "",
+    p: { zoek: ["job", "stage", "thesis"], richting: ["data", "hi", "ing", "econ"], domein: ["data", "consult"], grootte: "startup", locatie: ["gent", "brussel"], s_structuur: 4, s_team: 3, s_tempo: 3, s_inter: 3, s_mensen: 5, s_plek: 5, waarden: ["impact", "sfeer"] } },
+  { naam: "Talentwerk", stand: 120, pitch: "HR-dienstverlening met kantoren in heel Vlaanderen.", website: "",
+    p: { zoek: ["job", "studjob", "stage"], richting: ["bk", "econ", "ander", "recht"], domein: ["hr", "marketing"], grootte: "groot", locatie: ["vlaanderen", "gent", "antwerpen"], s_structuur: 2, s_team: 1, s_tempo: 4, s_inter: 5, s_mensen: 1, s_plek: 2, waarden: ["sfeer", "leren"] } },
+  { naam: "Fiscalis Advocaten", stand: 75, pitch: "Fiscaal advocatenkantoor dat ook economen zoekt voor tax advisory.", website: "",
+    p: { zoek: ["stage", "job"], richting: ["recht", "econ", "hw"], domein: ["tax"], grootte: "kmo", locatie: ["brussel", "gent"], s_structuur: 2, s_team: 4, s_tempo: 1, s_inter: 3, s_mensen: 3, s_plek: 2, waarden: ["loon", "groei"] } }
+];
+
+/* ===================================================================== */
+const $ = s => document.querySelector(s);
+const el = (tag, attrs = {}, ...kids) => {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === "class") e.className = v; else if (k === "text") e.textContent = v;
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2), v); else if (v !== false && v != null) e.setAttribute(k, v === true ? "" : v);
+  }
+  for (const c of kids.flat()) if (c != null) e.append(c);
+  return e;
+};
+const label = (lijst, id) => (lijst.find(o => o[0] === id) || EGAAL)[1];
+const lijstTekst = arr => arr.length <= 1 ? (arr[0] || "") : arr.slice(0, -1).join(", ") + " en " + arr[arr.length - 1];
+const veilig = (fn, d) => { try { return fn(); } catch (e) { return d; } };
+const DEMOMODUS = !CONFIG.ENDPOINT;
+document.querySelectorAll(".ed").forEach(e => e.textContent = CONFIG.EDITIE);
+
+/* ---------------- matching ---------------- */
+const GEWICHT = { zoek: 26, domein: 26, richting: 10, grootte: 5, locatie: 7, waarden: 8, schalen: 18 };
+function match(st, b) {
+  const p = b.p || {}; let tot = 0; const why = [];
+  // 1. aanbod
+  const zoek = (st.zoek || []).filter(z => (p.zoek || []).includes(z));
+  if (zoek.length) { tot += GEWICHT.zoek; why.push({ w: 3, t: `Biedt een ${lijstTekst(zoek.map(z => label(ZOEK, z).toLowerCase()))} aan` }); }
+  // 2. domein: aandeel van jouw domeinen dat ze dekken
+  const dom = (st.domein || []).filter(d => (p.domein || []).includes(d));
+  if ((st.domein || []).length) tot += GEWICHT.domein * Math.min(1, dom.length / Math.min(st.domein.length, 2));
+  if (dom.length) why.push({ w: 3 + dom.length, t: `Werft in ${lijstTekst(dom.map(d => label(DOMEIN, d)))}` });
+  // 3. richting
+  if ((p.richting || []).includes(st.richting)) { tot += GEWICHT.richting; why.push({ w: 1, t: `Zoekt studenten ${label(RICHTING, st.richting)}` }); }
+  // 4. grootte
+  if (st.grootte === "egaal") tot += GEWICHT.grootte;
+  else if (st.grootte === p.grootte) { tot += GEWICHT.grootte; why.push({ w: 1.5, t: `Is een ${label(GROOTTE, p.grootte).toLowerCase()}, zoals je zocht` }); }
+  // 5. locatie
+  const loc = (st.locatie || []).filter(l => (p.locatie || []).includes(l));
+  if ((st.locatie || []).includes("egaal")) tot += GEWICHT.locatie;
+  else if (loc.length) { tot += GEWICHT.locatie; why.push({ w: 1, t: `Werkplek in ${lijstTekst(loc.map(l => label(LOCATIE, l)))}` }); }
+  // 6. waarden
+  const wa = (st.waarden || []).filter(w => (p.waarden || []).includes(w));
+  tot += GEWICHT.waarden * wa.length / 2;
+  if (wa.length) why.push({ w: 2 + wa.length, t: `Sterk in ${lijstTekst(wa.map(w => label(WAARDEN, w).toLowerCase()))}` });
+  // 7. werksfeer
+  let sc = 0, beste = null;
+  SCHALEN.forEach(([id, l, r]) => {
+    const a = st["s_" + id], c = p["s_" + id]; if (!a || !c) { sc += .5; return; }
+    const d = Math.abs(a - c); sc += 1 - d / 4;
+    if (d === 0 && a !== 3 && (!beste || Math.abs(a - 3) > Math.abs(beste.a - 3))) beste = { a, t: a < 3 ? l : r };
+  });
+  tot += GEWICHT.schalen * sc / SCHALEN.length;
+  if (beste) why.push({ w: 2, t: `Net als jij: ${beste.t.charAt(0).toLowerCase() + beste.t.slice(1)}` });
+  why.sort((x, y) => y.w - x.w);
+  return { b, pct: Math.round(tot), why: why.slice(0, 3).map(w => w.t), zoek };
+}
+
+/* ---------------- bedrijven laden ---------------- */
+let BEDRIJVEN = DEMOMODUS ? DEMO : [];
+let geladen = DEMOMODUS ? Promise.resolve() : fetch(CONFIG.ENDPOINT + "?actie=bedrijven", { cache: "no-store" })
+  .then(r => r.json()).then(d => { BEDRIJVEN = (d.bedrijven || []).filter(b => b && b.naam && b.p); })
+  .catch(() => { BEDRIJVEN = []; });
+
+/* ---------------- studentquiz ---------------- */
+let stap = 0, antw = {};
+const SV = VRAGEN.map(v => ({ ...v, ...v.s, type: (v.s && v.s.type) || v.type }));
+
+function toonVraag() {
+  const v = SV[stap];
+  $("#qnr").textContent = `Vraag ${stap + 1} van ${SV.length}`;
+  $("#qbar").style.width = (stap / SV.length * 100) + "%";
+  const kaart = $("#qcard"); kaart.replaceChildren();
+  kaart.append(el("h2", { text: v.titel, tabindex: "-1", id: "qtitel" }));
+  if (v.help) kaart.append(el("p", { class: "sub", text: v.help }));
+  const volgende = el("button", { class: "btn", type: "button", text: stap === SV.length - 1 ? "Toon mijn matches" : "Volgende", onclick: verder });
+  const telling = el("span", { class: "count" });
+
+  if (v.type === "schaal") {
+    const dots = el("div", { class: "dots", role: "radiogroup", "aria-label": `${v.links} of ${v.rechts}` });
+    for (let i = 1; i <= 5; i++) {
+      dots.append(el("button", { type: "button", class: "dot s" + i, role: "radio", "aria-pressed": String(antw[v.id] === i), "aria-checked": String(antw[v.id] === i),
+        "aria-label": ["Helemaal links", "Eerder links", "Allebei evenveel", "Eerder rechts", "Helemaal rechts"][i - 1],
+        onclick: () => { antw[v.id] = i; setTimeout(verder, 160); toonVraag(); } }));
+    }
+    kaart.append(el("div", { class: "scale" }, el("div", { class: "pole", text: v.links }), dots, el("div", { class: "pole r", text: v.rechts })));
+    volgende.disabled = !antw[v.id];
+  } else {
+    const opties = v.egaal ? [...v.opties, EGAAL] : v.opties;
+    const multi = v.type === "multi";
+    if (multi && !antw[v.id]) antw[v.id] = [];
+    const box = el("div", { class: "opts" });
+    opties.forEach(([id, txt]) => {
+      const aan = multi ? antw[v.id].includes(id) : antw[v.id] === id;
+      box.append(el("button", { type: "button", class: "opt" + (multi ? "" : " radio"), "aria-pressed": String(aan),
+        onclick: () => {
+          if (!multi) { antw[v.id] = id; toonVraag(); setTimeout(verder, 160); return; }
+          let a = antw[v.id];
+          if (id === "egaal") a = a.includes("egaal") ? [] : ["egaal"];
+          else { a = a.filter(x => x !== "egaal"); a = a.includes(id) ? a.filter(x => x !== id) : [...a, id]; if (v.max && a.length > v.max) a = a.slice(1); }
+          antw[v.id] = a; toonVraag();
+        } }, el("span", { class: "box", "aria-hidden": "true" }), txt));
+    });
+    kaart.append(box);
+    if (multi) {
+      const n = antw[v.id].length;
+      volgende.disabled = n < (v.min || 1);
+      telling.textContent = v.max ? `${n} van ${v.max} gekozen` : `${n} gekozen`;
+    } else volgende.disabled = !antw[v.id];
+  }
+  const terug = el("button", { class: "btn ghost", type: "button", text: "Terug", onclick: () => { if (stap > 0) { stap--; toonVraag(); } else { $("#quiz").hidden = true; $("#intro").hidden = false; } } });
+  kaart.append(el("div", { class: "qnav" }, terug, telling, volgende));
+}
+function verder() {
+  const v = SV[stap];
+  const ok = v.type === "multi" ? (antw[v.id] || []).length >= (v.min || 1) : !!antw[v.id];
+  if (!ok) return;
+  if (stap < SV.length - 1) { stap++; toonVraag(); veilig(() => $("#qtitel").focus({ preventScroll: true })); }
+  else resultaat();
+}
+
+async function resultaat() {
+  $("#qbar").style.width = "100%";
+  await geladen;
+  const lijst = BEDRIJVEN.map(b => match(antw, b)).sort((a, b) => b.pct - a.pct || a.b.naam.localeCompare(b.b.naam));
+  $("#quiz").hidden = true; $("#intro").hidden = true; $("#results").hidden = false;
+  const top = lijst.slice(0, CONFIG.TOP);
+  const box = $("#matches"); box.replaceChildren();
+  if (!top.length) {
+    box.append(el("div", { class: "empty", text: "Er staan nog geen bedrijfsprofielen online. Kom later terug of loop gewoon langs de standen." }));
+  }
+  top.forEach((m, i) => {
+    const b = m.b;
+    const body = el("div", { class: "body" },
+      el("div", { class: "top" }, el("h3", { text: b.naam }),
+        b.stand ? el("span", { class: "standtag", text: `Stand ${b.stand}` }) : el("span", { class: "standtag none", text: "Stand volgt" })),
+      b.pitch ? el("p", { text: b.pitch }) : null,
+      m.why.length ? el("ul", { class: "why" }, m.why.map(t => el("li", { text: t }))) : null,
+      el("div", { class: "tags" }, (b.p.zoek || []).map(z => el("span", { class: "tag", text: label(ZOEK, z) })),
+        b.website ? el("a", { class: "tag", href: b.website, target: "_blank", rel: "noopener", text: "Website ↗" }) : null));
+    box.append(el("article", { class: "match" },
+      el("div", { class: "side" }, el("span", { class: "rk", text: "#" + (i + 1) }), el("span", { class: "pct", text: m.pct + "%" })), body));
+  });
+  const all = $("#allList"); all.replaceChildren();
+  lijst.forEach(m => all.append(el("li", {}, el("span", { class: "p", text: m.pct + "%" }), el("span", { text: m.b.naam }),
+    el("span", { class: "s", text: m.b.stand ? "Stand " + m.b.stand : "" }))));
+  $("#allSum").textContent = `Alle ${lijst.length} bedrijven gerangschikt`;
+  $("#allWrap").hidden = lijst.length <= CONFIG.TOP;
+  tekenPlan(top);
+  window.scrollTo({ top: $("#results").getBoundingClientRect().top + scrollY - 16, behavior: "smooth" });
+  if (CONFIG.ENDPOINT && CONFIG.LOG_STUDENTEN) {
+    const d = new URLSearchParams({ actie: "student", editie: CONFIG.EDITIE, antwoorden: JSON.stringify(antw), top: top.map(m => `${m.b.naam} (${m.pct}%)`).join(" | ") });
+    fetch(CONFIG.ENDPOINT, { method: "POST", mode: "no-cors", body: d }).catch(() => {});
+  }
+}
+
+const NS = "http://www.w3.org/2000/svg";
+const sv = (tag, attrs, txt) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (txt != null) e.textContent = txt; return e; };
+function tekenPlan(top) {
+  const svg = $("#plan"); svg.replaceChildren();
+  // tent 1 (y 22–42) bovenaan, tent 2 (y 0–20) onderaan; ingang links
+  const Y = (y, h) => 42 - y - h;
+  svg.append(sv("rect", { class: "gang", x: 0, y: 20, width: 90, height: 2 }));
+  svg.append(sv("rect", { class: "tent", x: 0, y: 0, width: 90, height: 20, rx: .4 }));
+  svg.append(sv("rect", { class: "tent", x: 0, y: 22, width: 90, height: 20, rx: .4 }));
+  svg.append(sv("text", { class: "tl", x: 1.5, y: 18.6 }, "TENT 1"));
+  svg.append(sv("text", { class: "tl", x: 1.5, y: 40.6 }, "TENT 2"));
+  svg.append(sv("rect", { class: "door", x: -.6, y: .6, width: .6, height: 3.4 }));
+  svg.append(sv("text", { class: "doorlbl", x: -.9, y: -.8 }, "INGANG"));
+  const nrs = new Map(top.filter(m => m.b.stand).map((m, i) => [Number(m.b.stand), top.indexOf(m) + 1]));
+  STANDEN.forEach(([nr, x, y, w, h]) => svg.append(sv("rect", { class: "st" + (nrs.has(nr) ? " hit" : ""), x, y: Y(y, h), width: w, height: h })));
+  STANDEN.forEach(([nr, x, y, w, h]) => {
+    if (!nrs.has(nr)) return;
+    const g = sv("g", { class: "pin" });
+    g.append(sv("circle", { cx: x + w / 2, cy: Y(y, h) + h / 2, r: 1.7 }), sv("text", { x: x + w / 2, y: Y(y, h) + h / 2 + .1 }, nrs.get(nr)));
+    svg.append(g);
+  });
+  const ol = $("#route"); ol.replaceChildren();
+  const zonder = top.filter(m => !m.b.stand).length;
+  top.filter(m => m.b.stand).forEach(m => ol.append(el("li", {}, el("b", { text: top.indexOf(m) + 1 }), `${m.b.naam} · stand ${m.b.stand}`)));
+  if (zonder) ol.append(el("li", { class: "sub", text: `${zonder} bedrijf${zonder > 1 ? "ven hebben" : " heeft"} nog geen standnummer.` }));
+  $("#mapbox").hidden = !top.length || !STANDEN.length;
+}
+
+$("#start").onclick = () => { stap = 0; antw = {}; $("#intro").hidden = true; $("#results").hidden = true; $("#quiz").hidden = false; toonVraag(); veilig(() => $("#qtitel").focus()); };
+$("#opnieuw").onclick = () => $("#start").click();
+geladen.then(() => {
+  $("#aantalBedrijven").textContent = BEDRIJVEN.length ? `${BEDRIJVEN.length} bedrijven` : (DEMOMODUS ? "" : "Nog geen bedrijven online");
+});
+
+/* ---------------- bedrijfsformulier ---------------- */
+const BV = VRAGEN.map(v => ({ ...v, ...v.b, type: (v.b && v.b.type) || v.type }));
+let bantw = {};
+const CONCEPT = "matchquiz-bedrijf-concept";
+
+function bouwBedrijfsVragen() {
+  const wat = $("#bq_wat"), sfeer = $("#bq_sfeer"); wat.replaceChildren(); sfeer.replaceChildren();
+  BV.forEach(v => {
+    const q = el("div", { class: "q", id: "q_" + v.id });
+    if (v.type === "schaal") {
+      const dots = el("div", { class: "dots", role: "radiogroup", "aria-label": `${v.links} of ${v.rechts}` });
+      for (let i = 1; i <= 5; i++) dots.append(el("button", { type: "button", class: "dot s" + i, role: "radio", "aria-pressed": String(bantw[v.id] === i), "aria-checked": String(bantw[v.id] === i),
+        "aria-label": ["Helemaal links", "Eerder links", "Allebei evenveel", "Eerder rechts", "Helemaal rechts"][i - 1],
+        onclick: () => { bantw[v.id] = i; bijwerken(); } }));
+      q.append(el("div", { class: "scale" }, el("div", { class: "pole", text: v.links }), dots, el("div", { class: "pole r", text: v.rechts })));
+      sfeer.append(q);
+      return;
+    }
+    q.append(el("span", { class: "lbl", text: v.titel + (v.verplicht ? " *" : "") }));
+    if (v.help) q.append(el("span", { class: "help", text: v.help }));
+    const multi = v.type === "multi";
+    const box = el("div", { class: "opts" });
+    v.opties.forEach(([id, txt]) => {
+      const aan = multi ? (bantw[v.id] || []).includes(id) : bantw[v.id] === id;
+      box.append(el("button", { type: "button", class: "opt" + (multi ? "" : " radio"), "aria-pressed": String(aan),
+        onclick: () => {
+          if (!multi) bantw[v.id] = id;
+          else { let a = bantw[v.id] || []; a = a.includes(id) ? a.filter(x => x !== id) : [...a, id]; if (v.max && a.length > v.max) a = a.slice(1); bantw[v.id] = a; }
+          bijwerken();
+        } }, el("span", { class: "box", "aria-hidden": "true" }), txt));
+    });
+    q.append(box);
+    (v.id === "waarden" ? sfeer : wat).append(q);
+  });
+}
+const VELDEN = ["naam", "stand", "contact", "email", "web", "pitch", "code"];
+function bwaarde() { const o = {}; VELDEN.forEach(k => o[k] = $("#b_" + k).value.trim()); return o; }
+function bijwerken() {
+  bouwBedrijfsVragen(); preview();
+  veilig(() => localStorage.setItem(CONCEPT, JSON.stringify({ v: bwaarde(), a: bantw })));
+}
+function preview() {
+  const d = bwaarde();
+  $("#pitchCount").textContent = `${d.pitch.length} / 160 tekens · dit zien studenten bij hun match`;
+  const p = $("#bpreview"); p.replaceChildren();
+  const zoek = bantw.zoek || [];
+  p.append(el("article", { class: "match" },
+    el("div", { class: "side" }, el("span", { class: "rk", text: "#1" }), el("span", { class: "pct", text: "87%" })),
+    el("div", { class: "body" },
+      el("div", { class: "top" }, el("h3", { text: d.naam || "Jullie bedrijf" }), d.stand ? el("span", { class: "standtag", text: "Stand " + d.stand }) : el("span", { class: "standtag none", text: "Stand volgt" })),
+      el("p", { text: d.pitch || "Hier komt jullie pitch." }),
+      el("ul", { class: "why" },
+        zoek.length ? el("li", { text: `Biedt een ${lijstTekst(zoek.slice(0, 2).map(z => label(ZOEK, z).toLowerCase()))} aan` }) : null,
+        (bantw.domein || []).length ? el("li", { text: `Werft in ${lijstTekst(bantw.domein.slice(0, 2).map(x => label(DOMEIN, x)))}` }) : null,
+        (bantw.waarden || []).length ? el("li", { text: `Sterk in ${lijstTekst(bantw.waarden.map(x => label(WAARDEN, x).toLowerCase()))}` }) : null),
+      el("div", { class: "tags" }, zoek.map(z => el("span", { class: "tag", text: label(ZOEK, z) }))))));
+}
+function controleer() {
+  document.querySelectorAll(".bad").forEach(e => e.classList.remove("bad"));
+  const d = bwaarde(), fout = [];
+  const veld = (k, ok) => { if (!ok) { $("#b_" + k).closest(".field").classList.add("bad"); fout.push(k); } };
+  veld("naam", d.naam); veld("contact", d.contact); veld("email", /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d.email)); veld("pitch", d.pitch);
+  veld("stand", !d.stand || (Number(d.stand) >= 1 && Number(d.stand) <= 128));
+  if (d.web && !/^https?:\/\//i.test(d.web)) $("#b_web").value = d.web = "https://" + d.web;
+  if (CONFIG.CODE_VRAGEN) veld("code", d.code);
+  let open = 0;
+  BV.forEach(v => {
+    const a = bantw[v.id];
+    const ok = v.type === "multi" ? (a || []).length >= (v.min || 1) : !!a;
+    if (!ok) { $("#q_" + v.id).classList.add("bad"); open++; }
+  });
+  return { d, fout, open };
+}
+$("#bform").addEventListener("input", e => {
+  const f = e.target.closest(".field"); if (f) f.classList.remove("bad"); preview(); veilig(() => localStorage.setItem(CONCEPT, JSON.stringify({ v: bwaarde(), a: bantw }))); });
+$("#bform").addEventListener("submit", async e => {
+  e.preventDefault();
+  const { d, fout, open } = controleer();
+  const err = $("#berr");
+  if (fout.length || open) {
+    err.hidden = false;
+    err.textContent = [fout.length ? "Vul de rood gemarkeerde gegevens in." : "", open ? `Nog ${open} vra${open > 1 ? "gen" : "ag"} open (rood gemarkeerd).` : ""].join(" ");
+    const eerste = document.querySelector(".bad"); if (eerste) eerste.scrollIntoView({ behavior: "smooth", block: "center" });
+    return;
+  }
+  err.hidden = true;
+  const profiel = {}; BV.forEach(v => profiel[v.id] = bantw[v.id]);
+  const data = { actie: "bedrijf", editie: CONFIG.EDITIE, bedrijf: d.naam, contact: d.contact, email: d.email, stand: d.stand, website: d.web, pitch: d.pitch, code: d.code, profiel: JSON.stringify(profiel), website2: $("#b_website2").value };
+  const knop = $("#bsend"); knop.disabled = true; knop.textContent = "Versturen…";
+  let gelukt = true;
+  if (CONFIG.ENDPOINT) {
+    try { await fetch(CONFIG.ENDPOINT, { method: "POST", mode: "no-cors", body: new URLSearchParams(data) }); }
+    catch (x) { gelukt = false; }
+  }
+  knop.disabled = false; knop.textContent = "Profiel versturen";
+  if (!gelukt) { err.hidden = false; err.textContent = "Versturen lukte niet. Controleer je internetverbinding en probeer opnieuw."; return; }
+  $("#bform").hidden = true; $("#bdone").hidden = false;
+  const samenvatting = [`Bedrijfsprofiel ${CONFIG.EDITIE}`, `Bedrijf: ${d.naam}${d.stand ? " (stand " + d.stand + ")" : ""}`, `Contact: ${d.contact} – ${d.email}`, d.web ? `Website: ${d.web}` : "", `Pitch: ${d.pitch}`, "",
+    ...BV.map(v => v.type === "schaal" ? `${v.links} ↔ ${v.rechts}: ${profiel[v.id]}/5` : `${v.titel} ${[].concat(profiel[v.id]).map(x => label(v.opties, x)).join(", ")}`)].filter((x, i) => x !== "" || i === 5).join("\n");
+  if (DEMOMODUS) {
+    $("#bdoneTitel").textContent = "Demomodus: er is niets verstuurd";
+    $("#bdoneTekst").textContent = "Het formulier is nog niet gekoppeld aan de Google Sheet. Kopieer de samenvatting en mail ze naar VEK Recruitment.";
+    $("#bdonePre").hidden = false; $("#bdonePre").textContent = samenvatting; $("#bcopy").hidden = false;
+  }
+  $("#bdone").scrollIntoView({ behavior: "smooth", block: "start" });
+});
+$("#bcopy").onclick = () => {
+  const t = $("#bdonePre").textContent;
+  navigator.clipboard.writeText(t).then(() => $("#bcopy").textContent = "Gekopieerd", () => {
+    const r = document.createRange(); r.selectNodeContents($("#bdonePre")); const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+  });
+};
+$("#bedit").onclick = () => { $("#bdone").hidden = true; $("#bform").hidden = false; };
+
+function startBedrijf() {
+  $("#codeField").hidden = !CONFIG.CODE_VRAGEN;
+  const c = veilig(() => JSON.parse(localStorage.getItem(CONCEPT) || "null"), null);
+  if (c) { VELDEN.forEach(k => { if (c.v && c.v[k] != null) $("#b_" + k).value = c.v[k]; }); bantw = c.a || {}; }
+  bouwBedrijfsVragen(); preview();
+}
+
+/* ---------------- modus ---------------- */
+function modus() {
+  const h = location.hash.slice(1);
+  const m = h === "bedrijf" || h === "student" ? h : STANDAARD_MODUS;
+  $("#student").hidden = m !== "student"; $("#bedrijf").hidden = m !== "bedrijf";
+  $("#demoBannerS").hidden = $("#demoBannerB").hidden = !DEMOMODUS;
+  document.title = m === "bedrijf" ? "Bedrijfsprofiel Career Day" : "Career Day Matchquiz";
+  const s = $("#switch"); s.replaceChildren(m === "bedrijf" ? el("a", { href: "#student", text: "Naar de studentenquiz" }) : el("a", { href: "#bedrijf", text: "Bedrijf? Vul hier jullie profiel in" }));
+  if (m === "bedrijf") startBedrijf();
+}
+addEventListener("hashchange", () => { modus(); scrollTo(0, 0); });
+modus();
+</script>
