@@ -78,6 +78,8 @@ svg.plan { display: block; width: 100%; min-width: 760px; height: auto; user-sel
 .zlabel { font-size: 1.05px; font-weight: 600; fill: var(--ink-muted); text-anchor: middle; dominant-baseline: middle; pointer-events: none; letter-spacing: .02em; }
 .tentlabel { font-size: 1.5px; font-weight: 800; fill: var(--green-dark); letter-spacing: .12em; }
 .door { fill: var(--green); }
+.loper { fill: none; stroke: #9FD0AC; stroke-width: 2; stroke-linejoin: miter; stroke-linecap: butt; }
+.loperlbl { font-size: .8px; font-weight: 700; fill: var(--green-deep); letter-spacing: .08em; }
 .doorlbl { font-size: .95px; font-weight: 700; fill: var(--green); }
 
 .stand rect { fill: var(--white); stroke: var(--green); stroke-width: .14; transition: fill .12s; }
@@ -101,6 +103,7 @@ svg.plan { display: block; width: 100%; min-width: 760px; height: auto; user-sel
 .sw.sel { background: var(--green); border-color: var(--green-deep); }
 .sw.taken { background: repeating-linear-gradient(45deg, #E3E7E1 0 3px, #FFF 3px 6px); border-color: var(--taken); }
 .sw.zone { background: var(--sage-soft); border-color: #A9C3A1; }
+.sw.loper { background: #B9DCC2; border-color: #7DBE8F; }
 
 .tip { position: fixed; z-index: 20; pointer-events: none; background: var(--green-deep); color: var(--cream); border-radius: 10px; padding: 8px 12px; font-size: 13px; line-height: 1.4; max-width: 240px; box-shadow: 0 8px 24px rgba(22,60,42,.25); }
 .tip b { font-size: 15px; }
@@ -235,6 +238,7 @@ footer { background: var(--green-deep); color: var(--sage); font-size: 13px; pad
           <span><i class="sw sel"></i>Jouw keuze</span>
           <span><i class="sw taken"></i>Niet beschikbaar</span>
           <span><i class="sw zone"></i>Faciliteiten</span>
+          <span><i class="sw loper"></i>Groene loper (bezoekersroute)</span>
         </div>
       </div>
       <p class="hint">Op een smal scherm kan je het plan horizontaal verschuiven. Indeling op basis van Career Day 25–26; kleine verschuivingen zijn mogelijk.</p>
@@ -262,7 +266,7 @@ footer { background: var(--green-deep); color: var(--sage); font-size: 13px; pad
 
   <div class="info">
     <div><h3>Wat zit er bij een stand?</h3><p>Een standplaats van 2 × 3 m, op 30 cm van de tentwand. Stroom voorzien we per stand; laat in de opmerkingen weten als je meer nodig hebt.</p></div>
-    <div><h3>Wat betekent kopstand?</h3><p>Een stand met minstens drie open zijden, aan het einde van een rij. Wandstanden staan tegen de tentwand, eilandstanden staan rug aan rug in het midden.</p></div>
+    <div><h3>Wat betekent kopstand?</h3><p>Een stand met minstens drie open zijden, aan het einde van een rij. Wandstanden staan tegen de tentwand, eilandstanden staan rug aan rug in het midden. De groene loper is de route die alle bezoekers volgen.</p></div>
     <div><h3>Iets veranderen?</h3><p>Verstuur gewoon opnieuw met dezelfde bedrijfsnaam. We houden je laatste inzending aan.</p></div>
   </div>
 </main>
@@ -329,6 +333,11 @@ function tekenBasis() {
     if (vert) tx.setAttribute("transform", `rotate(-90 ${(x0 + x1) / 2} ${H - (y0 + y1) / 2})`);
     tx.textContent = t;
   }
+  // groene loper (2 m breed) – bezoekersroute
+  const LOPER = [[0,39.5],[2.5,39.5],[2.5,33],[15,33],[15,37.3],[25,37.3],[25,26.4],[32.3,26.4],[32.3,37.5],[39.5,37.5],[39.5,26.2],[46.5,26.2],[46.5,37.5],[53.5,37.5],[53.5,27.8],[60.5,27.8],[60.5,37.5],[67.5,37.5],[67.5,26.2],[74.75,26.2],[74.75,37.5],[82.4,37.5],[82.4,4.4],[74.75,4.4],[74.75,15],[67.5,15],[67.5,4.4],[60.5,4.4],[60.5,14.75],[53.5,14.75],[53.5,4.4],[46.5,4.4],[46.5,15.5],[39,15.5],[39,9.5],[20,9.5]];
+  el("polyline", { points: LOPER.map(([x, y]) => `${x},${H - y}`).join(" "), class: "loper", "aria-hidden": "true" }, g);
+  const ll = el("text", { x: 8.8, y: H - 33, class: "loperlbl", "text-anchor": "middle", "dominant-baseline": "central" }, g); ll.textContent = "GROENE LOPER";
+
   // ingang / uitgang
   for (const [lbl, y] of [["INGANG", 39.5], ["UITGANG", 24.5]]) {
     el("rect", { x: -0.5, y: H - y - 1.25, width: .7, height: 2.5, class: "door", rx: .15 }, g);

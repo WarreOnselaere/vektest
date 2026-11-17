@@ -59,6 +59,15 @@ ZONES = [
     ("RECRUITERS ZONE", 48.1, 16.5, 65.7, 19.7, "ALG-ZONES"),
 ]
 
+# Groene loper (as, 2,00 m breed) – slingert door tent 1, via de tussengang naar tent 2
+LOPER_B = 2.0
+LOPER = [(0, 39.5), (2.5, 39.5), (2.5, 33), (15, 33), (15, 37.3), (25, 37.3), (25, 26.4),
+         (32.3, 26.4), (32.3, 37.5), (39.5, 37.5), (39.5, 26.2), (46.5, 26.2), (46.5, 37.5),
+         (53.5, 37.5), (53.5, 27.8), (60.5, 27.8), (60.5, 37.5), (67.5, 37.5), (67.5, 26.2),
+         (74.75, 26.2), (74.75, 37.5), (82.4, 37.5), (82.4, 4.4), (74.75, 4.4), (74.75, 15),
+         (67.5, 15), (67.5, 4.4), (60.5, 4.4), (60.5, 14.75), (53.5, 14.75), (53.5, 4.4),
+         (46.5, 4.4), (46.5, 15.5), (39, 15.5), (39, 9.5), (20, 9.5)]
+
 # Uitgangen: (code, wand, middenpositie, breedte, omschrijving)
 #   wand: S = y 0 (tent 2), N = y 42 (tent 1), W = x 0 (ingangszijde), O = x 90
 UITGANGEN = [
@@ -98,16 +107,22 @@ LAGEN = {
     "ALG-ZONES-TEKST":        (7,   "Continuous", 25, "Benaming zones en gangen", True),
     "ALG-MAATVOERING":        (7,    "Continuous", 18, "Maatvoering", True),
     # --- elektriciteitsplan
-    "ELEK-HOOFDVOEDING":      (1,   "Continuous", 50, "Aggregaat / netaansluiting en hoofdverdeelbord", True),
-    "ELEK-VOEDINGSKABELS":    (1,   "DASHDOT",    35, "Voedingskabels HVB -> SVB (bovengronds langs goot)", True),
-    "ELEK-VERDEELBORDEN":     (1,   "Continuous", 35, "Subverdeelborden (SVB)", True),
-    "ELEK-KABELS-STANDS":     (6,   "Continuous", 25, "Kabeltracé standvoeding (vloer, langs ruglijn stands)", True),
-    "ELEK-STOPCONTACTEN":     (6,   "Continuous", 25, "Stopcontacten 230 V / 16 A per stand", True),
-    "ELEK-CEE-400V":          (1,   "Continuous", 25, "CEE-contactdozen 400 V / 32 A", True),
-    "ELEK-VERLICHTING":       (40,  "Continuous", 25, "Verlichtingsarmaturen tent", True),
-    "ELEK-KABELS-VERLICHTING": (40, "DASHED",     18, "Verlichtingskringen (bovengronds)", True),
-    "ELEK-KABELBRUGGEN":      (30,  "Continuous", 25, "Kabelbruggen / kabelmatten over looppaden", True),
-    "ELEK-TEKST":             (7,   "Continuous", 18, "Benaming kringen en borden", True),
+    "ELEK-HOOFDVOEDING":      (1,   "Continuous", 50, "Hoofdverdeelborden 125 A (HVB-N, HVB-Z)", True),
+    "ELEK-PADDENSTOELEN":     (1,   "Continuous", 35, "Paddenstoelen 32 A (verdeelkasten op de vloer)", True),
+    "ELEK-KATTEKOPPEN":       (7,   "Continuous", 25, "Kattekoppen: 2 stopcontacten per stand / verbruiker", True),
+    "ELEK-KABEL-05M":         (5,   "Continuous", 25, "Kabels 5 m (blauw)", True),
+    "ELEK-KABEL-10M":         (30,  "Continuous", 25, "Kabels 10 m (oranje)", True),
+    "ELEK-KABEL-15M":         (6,   "Continuous", 25, "Kabels 15 m (paars)", True),
+    "ELEK-KABEL-40M":         (1,   "Continuous", 35, "Kabels 40 m (rood)", True),
+    "ELEK-KABELBRUGGEN":      (8,   "Continuous", 25, "Kabelbruggen over looppaden", True),
+    "ELEK-VERLICHTING":       (40,  "Continuous", 25, "Verlichtingsarmaturen tent (bovengronds)", True),
+    "ELEK-TEKST":             (7,   "Continuous", 18, "Benaming borden, paddenstoelen, kabels", True),
+    # --- groene loper
+    "LOPER-GROENE-LOPER":     (94,  "Continuous", 0,  "Groene loper 2,00 m (vulling)", True),
+    "LOPER-RAND":             (3,   "Continuous", 25, "Groene loper contour", True),
+    "LOPER-AS":               (3,   "DASHDOT",    13, "As van de groene loper", True),
+    "LOPER-MAATVOERING":      (7,   "Continuous", 18, "Lengtes loperdelen", True),
+    "LOPER-TEKST":            (3,   "Continuous", 18, "Start, einde en looprichting", True),
     # --- noodplan
     "NOOD-UITGANGEN":         (3,   "Continuous", 50, "Nooduitgangen en hoofdingangen", True),
     "NOOD-VLUCHTWEGEN":       (3,   "Continuous", 35, "Vluchtrichting (pijlen)", True),
@@ -128,6 +143,7 @@ GROEPEN = {
     "ALG": [n for n in LAGEN if n.startswith("ALG-")],
     "ELEK": [n for n in LAGEN if n.startswith("ELEK-")],
     "NOOD": [n for n in LAGEN if n.startswith("NOOD-")],
+    "LOPER": [n for n in LAGEN if n.startswith("LOPER-")],
 }
 
 TXT = "ARIAL"
@@ -257,6 +273,20 @@ def maak_blokken(doc):
     blk.add_text("G", height=0.9, dxfattribs={"style": TXT}).set_placement(
         (0, 0), align=TextEntityAlignment.MIDDLE_CENTER)
 
+    # paddenstoel: koepel op voet (verdeelkast 32 A op de vloer)
+    blk = b.new("PADDENSTOEL")
+    blk.add_circle((0, 0), 0.55)
+    add_fill(blk, [(-0.4, 0.0), (-0.28, 0.28), (0.0, 0.4), (0.28, 0.28), (0.4, 0.0)], "0")
+    blk.add_lwpolyline(rect(-0.12, -0.38, 0.12, 0.0), close=True)
+    add_fill(blk, rect(-0.12, -0.38, 0.12, 0.0), "0")
+
+    # kattekop: blokje met 2 stopcontacten
+    blk = b.new("KATTEKOP")
+    blk.add_lwpolyline(rect(-0.4, -0.18, 0.4, 0.18), close=True)
+    for dx in (-0.2, 0.2):
+        blk.add_circle((dx, 0), 0.12)
+        add_fill(blk, rect(dx - 0.04, -0.04, dx + 0.04, 0.04), "0")
+
     # verlichtingsarmatuur: cirkel met kruis
     blk = b.new("ARMATUUR")
     blk.add_circle((0, 0), 0.4)
@@ -267,9 +297,8 @@ def maak_blokken(doc):
     # kabelbrug 1 m x 1 m (wordt geschaald in y-richting)
     blk = b.new("KABELBRUG")
     blk.add_lwpolyline(rect(-0.35, -0.5, 0.35, 0.5), close=True)
-    h = blk.add_hatch(color=256)
-    h.paths.add_polyline_path(rect(-0.35, -0.5, 0.35, 0.5), is_closed=True)
-    h.set_pattern_fill("ANSI31", scale=0.04)
+    blk.add_line((-0.12, -0.5), (-0.12, 0.5))
+    blk.add_line((0.12, -0.5), (0.12, 0.5))
 
     # nooduitgang (groen vak met pijl), 1,6 x 0,8 m, pijl wijst naar +x
     blk = b.new("NOODUITGANG")
@@ -486,107 +515,203 @@ def teken_algemeen(msp):
 # ---------------------------------------------------------------------------
 # Elektriciteitsplan
 # ---------------------------------------------------------------------------
-HVB_POS = (93.5, 21.0)
-AGG_POS = (100.0, 21.0)
-N_SVB = 10
+HVBS = [("HVB-N", (50.0, 43.6)), ("HVB-Z", (50.0, -1.6)), ("HVB-W", (-2.0, 21.0)), ("HVB-M", (45.0, 21.0))]
+HOOFDKABELS = [("HVB-W", "HVB-M")]   # 125 A tussen hoofdborden (door de tussengang)
+KABEL_LAAG = {5: "ELEK-KABEL-05M", 10: "ELEK-KABEL-10M", 15: "ELEK-KABEL-15M", 40: "ELEK-KABEL-40M"}
+N_PADDENSTOEL = 16
+
+# vaste verbruikers buiten de stands (naam, aansluitpunt)
+EXTRA_AANSLUITINGEN = [
+    ("BAR 1", (11.0, 13.0)), ("BAR 2", (11.0, 6.0)), ("LOGISTIEK", (8.0, 18.0)),
+    ("VESTIAIRE", (8.0, 24.0)), ("CV-CHECK", (8.0, 35.0)), ("LANYARDS", (19.5, 34.8)),
+    ("GOODIES", (27.4, 31.2)), ("CV-SCREENING", (24.0, 17.2)), ("PHOTOBOOTH 3200 W", (32.7, 17.2)),
+    ("INKOM / TV", (1.0, 30.0)),
+    ("HEAT Z1", (39.45, -0.6)), ("HEAT Z2", (71.05, -0.6)), ("HEAT N1", (71.05, 42.6)),
+    ("HEAT N2", (17.15, 42.6)),
+]
+
+_ONTWERP = {}
 
 
-def svb_posities():
-    """Verdeel de stands in N_SVB groepen (k-means op standcentra) en zoek per groep
-    een vrij punt in een gang nabij het zwaartepunt voor de verdeelkast (32 A)."""
-    pts = [((s["x0"] + s["x1"]) / 2, (s["y0"] + s["y1"]) / 2, s) for s in stands_cache()]
-    # startcentra: verdeeld over tent 1 en tent 2 op gelijke x-afstand
-    centra = []
-    for tent in ("1", "2"):
-        sub = sorted([p for p in pts if p[2]["tent"] == tent], key=lambda p: p[0])
-        n = N_SVB // 2
-        for k in range(n):
-            blok = sub[k * len(sub) // n:(k + 1) * len(sub) // n]
-            centra.append((sum(p[0] for p in blok) / len(blok), sum(p[1] for p in blok) / len(blok), tent))
-    for _ in range(15):
-        groepen = [[] for _ in centra]
-        for p in pts:
-            i = min((i for i, c in enumerate(centra) if c[2] == p[2]["tent"]),
-                    key=lambda i: (centra[i][0] - p[0]) ** 2 + (centra[i][1] - p[1]) ** 2)
-            groepen[i].append(p)
-        centra = [(sum(p[0] for p in g) / len(g), sum(p[1] for p in g) / len(g), c[2])
-                  if g else c for g, c in zip(groepen, centra)]
-    res = []
-    for (cx, cy, tent), g in zip(centra, groepen):
-        ty0, ty1 = T1 if tent == "1" else T2
-        best = None
-        for dx in [i * 0.5 for i in range(-16, 17)]:
-            for dy in [i * 0.5 for i in range(-16, 17)]:
-                x, y = round(cx + dx, 1), round(cy + dy, 1)
-                if not (ty0 + 0.6 < y < ty1 - 0.6 and 1 < x < 89):
-                    continue
-                if bezet(x, y, 0.9):
-                    continue
-                d = dx * dx + dy * dy
-                if best is None or d < best[0]:
-                    best = (d, x, y)
-        res.append(((best[1], best[2]), [p[2] for p in g]))
-    res.sort(key=lambda r: (r[0][1] < 21, r[0][0]))
-    return res
+def kattekop_pos(s):
+    """Kattekop tegen de 'rug' van de stand: kant die tegen een andere stand of de wand staat."""
+    ty0, ty1 = T1 if s["tent"] == "1" else T2
+    x0, y0, x1, y1 = s["x0"], s["y0"], s["x1"], s["y1"]
+    tol = 0.35
+    kanten = {}
+    for o in stands_cache():
+        if o is s:
+            continue
+        if min(y1, o["y1"]) - max(y0, o["y0"]) > 0.5:
+            if abs(o["x1"] - x0) < tol: kanten["W"] = 1
+            if abs(o["x0"] - x1) < tol: kanten["O"] = 1
+        if min(x1, o["x1"]) - max(x0, o["x0"]) > 0.5:
+            if abs(o["y1"] - y0) < tol: kanten["Z"] = 1
+            if abs(o["y0"] - y1) < tol: kanten["N"] = 1
+    if y0 - ty0 < 0.8: kanten["Z"] = 2
+    if ty1 - y1 < 0.8: kanten["N"] = 2
+    if x1 > 89.2: kanten["O"] = 2
+    voorkeur = sorted(kanten, key=lambda k: -kanten[k]) or (["N"] if (y0 + y1) / 2 > (ty0 + ty1) / 2 else ["Z"])
+    k = voorkeur[0]
+    cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+    return {"W": ((x0 + 0.35, cy), 90), "O": ((x1 - 0.35, cy), -90),
+            "Z": ((cx, y0 + 0.35), 0), "N": ((cx, y1 - 0.35), 180)}[k]
+
+
+def elek_ontwerp():
+    if _ONTWERP:
+        return _ONTWERP
+    from elek_routing import Rooster, ontwerp
+    rooster = Rooster(stands_cache(), ZONES, [(0, T2[0], L, T2[1]), (0, T1[0], L, T1[1])],
+                      (0, T2[1], L, T1[0]), LOPER, LOPER_B)
+    aans = []
+    for s in stands_cache():
+        pos, rot = kattekop_pos(s)
+        aans.append(dict(naam=s["code"], pos=pos, rot=rot, stand=True))
+    for naam, pos in EXTRA_AANSLUITINGEN:
+        aans.append(dict(naam=naam, pos=pos, rot=0, stand=False))
+    ps, kabels, voeding, bezetting = ontwerp(rooster, aans, HVBS, N_PADDENSTOEL)
+    _ONTWERP.update(rooster=rooster, aans=aans, ps=ps, kabels=kabels, voeding=voeding,
+                    bezetting=bezetting)
+    return _ONTWERP
+
+
+def materiaal():
+    o = elek_ontwerp()
+    from collections import Counter
+    kab = Counter()
+    for k in o["kabels"] + o["voeding"]:
+        for stuk in k["klasse"]:
+            kab[stuk] += 1
+    bruggen = set()
+    for k in o["kabels"] + o["voeding"]:
+        for (c, horiz, l) in k["bruggen"]:
+            bruggen.add((round(c[0]), round(c[1]), horiz))
+    n_kk = len(o["aans"])
+    return dict(paddenstoelen=len(o["ps"]), kattekoppen=n_kk, stopcontacten=2 * n_kk,
+                kabels=dict(sorted(kab.items())), kabelbruggen=len(bruggen), hvb=len(HVBS))
 
 
 def teken_elektriciteit(msp):
     lay = "ELEK-TEKST"
-    ins(msp, "AGGREGAAT", AGG_POS, "ELEK-HOOFDVOEDING", rot=90)
-    add_txt(msp, "AGGREGAAT / NETAANSLUITING", (AGG_POS[0] + 2.3, AGG_POS[1]), 0.5, lay, rot=90)
-    add_txt(msp, "(ELEK-doorsteek plein: te bevestigen)", (AGG_POS[0] + 3.2, AGG_POS[1]), 0.4, lay, rot=90)
-    ins(msp, "HOOFDVERDEELBORD", HVB_POS, "ELEK-HOOFDVOEDING", rot=90)
-    add_txt(msp, "HVB 125 A", (HVB_POS[0], HVB_POS[1] + 2.0), 0.5, lay)
-    msp.add_line((AGG_POS[0] - 1.2, AGG_POS[1]), (HVB_POS[0] + 0.4, HVB_POS[1]),
-                 dxfattribs={"layer": "ELEK-HOOFDVOEDING"})
+    o = elek_ontwerp()
+    for naam, pos in HVBS:
+        ins(msp, "HOOFDVERDEELBORD", pos, "ELEK-HOOFDVOEDING")
+        boven = pos[1] > 21
+        add_txt(msp, f"{naam} 125 A", (pos[0] + 1.2, pos[1] + 0.2), 0.5, lay,
+                align=TextEntityAlignment.MIDDLE_LEFT)
+        bron = {"HVB-N": "← ELEK+W plein (stad Gent)", "HVB-Z": "← ELEK-doorsteek plein",
+                "HVB-W": "← ELEK-doorsteek (kop tussengang)", "HVB-M": "tussenbord in tussengang"}[naam]
+        add_txt(msp, bron,
+                (pos[0] + 1.2, pos[1] - 0.55), 0.35, lay, align=TextEntityAlignment.MIDDLE_LEFT)
 
-    # voeding door de tussengang (y = 21) naar elke verdeelkast
-    svbs = svb_posities()
-    xmin = min(p[0] for p, _ in svbs)
-    msp.add_line((HVB_POS[0] - 0.4, 21.0), (min(xmin, 0.8), 21.0),
-                 dxfattribs={"layer": "ELEK-VOEDINGSKABELS"})
-    add_txt(msp, "hoofdkabel 125 A door tussengang (kabelgoot / bovengronds)", (47.0, 21.55),
-            0.38, lay)
-    for i, ((x, y), groep) in enumerate(svbs, start=1):
-        naam = f"32-{i}"
-        msp.add_line((x, 21.0), (x, y), dxfattribs={"layer": "ELEK-VOEDINGSKABELS"})
-        ins(msp, "VERDEELBORD", (x, y), "ELEK-VERDEELBORDEN")
-        add_txt(msp, naam, (x, y + (0.75 if y > 21 else -0.75)), 0.45, lay)
-        for s in groep:
-            cx = (s["x0"] + s["x1"]) / 2
-            cy = (s["y0"] + s["y1"]) / 2
-            # stopcontact aan de rugzijde: kant verst van de dichtste gang ~ kant dichtst bij kast
-            ox = cx
-            oy = s["y0"] + 0.45 if y < cy else s["y1"] - 0.45
-            ins(msp, "STOPCONTACT_230V", (ox, oy), "ELEK-STOPCONTACTEN",
-                rot=0 if y < cy else 180)
-            msp.add_lwpolyline([(x, y), (x, oy), (ox, oy)],
-                               dxfattribs={"layer": "ELEK-KABELS-STANDS"})
+    # hoofdkabel 125 A tussen hoofdborden
+    pos = dict(HVBS)
+    for van, naar in HOOFDKABELS:
+        (xa, ya), (xb, yb) = pos[van], pos[naar]
+        msp.add_lwpolyline([(xa, ya), (xb, yb)], dxfattribs={"layer": "ELEK-HOOFDVOEDING", "lineweight": 70})
+        add_txt(msp, f"hoofdkabel 125 A {van} \u2192 {naar} (\u00b1 {abs(xb - xa) + 3:.0f} m)",
+                ((xa + xb) / 2, ya + 0.35), 0.38, lay, align=TextEntityAlignment.BOTTOM_CENTER)
 
-    # algemeen: onthaal / vestiaire / CV-check / bar
-    sp = {"layer": "ELEK-KABELS-STANDS"}
-    ins(msp, "VERDEELBORD", (1.0, 21.0), "ELEK-VERDEELBORDEN", rot=90)
-    add_txt(msp, "63-1 algemeen", (1.6, 20.3), 0.45, lay, align=TextEntityAlignment.MIDDLE_LEFT)
-    for p in ((4.5, 30.0), (8.0, 38.0), (19.5, 34.6)):
-        msp.add_lwpolyline([(1.0, 21.0), (1.0, p[1]), p], dxfattribs=sp)
-        ins(msp, "STOPCONTACT_230V", p, "ELEK-STOPCONTACTEN", rot=90)
-    for p in ((12.0, 15.5), (12.0, 3.4)):
-        msp.add_lwpolyline([(1.0, 21.0), (1.0, 18.0), (12.0, 18.0), p], dxfattribs=sp)
-        ins(msp, "CEE_400V", p, "ELEK-CEE-400V", rot=90 if p[1] > 10 else -90)
-    add_txt(msp, "bar 400 V / 32 A", (13.9, 16.4), 0.38, lay, align=TextEntityAlignment.MIDDLE_LEFT)
+    # kabels (kleur = lengte)
+    for k in o["voeding"] + o["kabels"]:
+        laag = KABEL_LAAG[max(k["klasse"])]
+        dik = 50 if k in o["voeding"] else 25
+        msp.add_lwpolyline(k["poly"], dxfattribs={"layer": laag, "lineweight": dik})
+    for k in o["voeding"]:
+        poly = k["poly"]
+        a, b = max(zip(poly, poly[1:]), key=lambda s: math.hypot(s[1][0] - s[0][0], s[1][1] - s[0][1]))
+        lbl = "+".join(str(x) for x in k["klasse"]) + " m"
+        rot = 90 if abs(b[0] - a[0]) < abs(b[1] - a[1]) else 0
+        add_txt(msp, f"32A {lbl}", ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2), 0.38, lay, rot=rot,
+                align=TextEntityAlignment.BOTTOM_CENTER)
+    # kabelbruggen (één per kruising, gedeeld door kabels op dezelfde plek)
+    gezien = set()
+    for k in o["kabels"] + o["voeding"]:
+        for (c, horiz, l) in k["bruggen"]:
+            sleutel = (round(c[0]), round(c[1]), horiz)
+            if sleutel in gezien:
+                continue
+            gezien.add(sleutel)
+            msp.add_blockref("KABELBRUG", c, dxfattribs={
+                "layer": "ELEK-KABELBRUGGEN", "rotation": 90 if horiz else 0,
+                "xscale": 1.0, "yscale": max(1.0, l)})
+    # paddenstoelen
+    for i, p in enumerate(o["ps"], start=1):
+        ins(msp, "PADDENSTOEL", p, "ELEK-PADDENSTOELEN")
+        add_txt(msp, f"P{i}", (p[0] + 0.65, p[1] + 0.45), 0.45, lay,
+                align=TextEntityAlignment.MIDDLE_LEFT)
+    # kattekoppen
+    for a in o["aans"]:
+        ins(msp, "KATTEKOP", a["pos"], "ELEK-KATTEKOPPEN", rot=a["rot"])
+        if not a["stand"]:
+            add_txt(msp, a["naam"].lower(), (a["pos"][0], a["pos"][1] - 0.6), 0.32, lay)
 
-    # verlichting: armaturen h.o.h. 10 m, 2 lijnen per tent
-    xs = [5.0 + 10.0 * i for i in range(9)]
-    for k, y in enumerate((5.0, 15.0, 27.0, 37.0), start=1):
-        msp.add_line((0.4, y), (xs[-1], y), dxfattribs={"layer": "ELEK-KABELS-VERLICHTING"})
-        for x in xs:
+    # verlichting (door tentverhuurder, bovengronds – enkel armaturen)
+    for y in (5.0, 15.0, 27.0, 37.0):
+        for x in [5.0 + 10.0 * i for i in range(9)]:
             ins(msp, "ARMATUUR", (x, y), "ELEK-VERLICHTING")
-        add_txt(msp, f"L{k}", (xs[-1] + 1.2, y), 0.55, lay, align=TextEntityAlignment.MIDDLE_LEFT)
-    msp.add_line((0.4, 5.0), (0.4, 37.0), dxfattribs={"layer": "ELEK-KABELS-VERLICHTING"})
 
-    # verwarming: aansluiting per heat-unit
-    for x, y in ((39.45, -0.4), (71.05, -0.4), (71.05, 42.4), (17.15, 42.4)):
-        ins(msp, "STOPCONTACT_230V", (x, y), "ELEK-STOPCONTACTEN", rot=180 if y < 0 else 0)
+
+def schrijf_materiaallijst():
+    o = elek_ontwerp()
+    m = materiaal()
+    regels = ["soort;aantal;opmerking",
+              f"hoofdverdeelbord 125 A;{m['hvb']};HVB-N (ELEK+W), HVB-Z en HVB-W (ELEK-doorsteek), HVB-M (tussengang, via hoofdkabel 125 A van HVB-W)",
+              f"paddenstoel 32 A;{m['paddenstoelen']};max. {9} aansluitingen per paddenstoel",
+              f"kattekop (2 stopcontacten);{m['kattekoppen']};1 per stand + vaste verbruikers",
+              f"stopcontacten totaal;{m['stopcontacten']};2 per kattekop"]
+    for l, n in m["kabels"].items():
+        regels.append(f"kabel {l} m;{n};kleur op plan: laag {KABEL_LAAG[l]}")
+    regels.append(f"kabelbrug;{m['kabelbruggen']};waar een kabel een looppad kruist")
+    regels.append("")
+    regels.append("paddenstoel;gevoed vanaf;voedingskabel;aantal aansluitingen;aansluitingen")
+    for i, p in enumerate(o["ps"]):
+        v = o["voeding"][i]
+        naar = [k["naar"] for k in o["kabels"] if k["van"] == i]
+        regels.append(f"P{i + 1};{v['van']};{'+'.join(str(x) for x in v['klasse'])} m;{len(naar)};"
+                      + ", ".join(naar))
+    regels.append("")
+    regels.append("aansluiting;paddenstoel;tracé (m);kabel")
+    for k in o["kabels"]:
+        regels.append(f"{k['naar']};P{k['van'] + 1};{k['lengte']:.1f};"
+                      + "+".join(str(x) for x in k["klasse"]) + " m")
+    (OUT / "materiaallijst_elektriciteit.csv").write_text("\n".join(regels) + "\n", encoding="utf-8")
+
+
+# ---------------------------------------------------------------------------
+# Groene loper
+# ---------------------------------------------------------------------------
+def teken_loper(msp):
+    lay = "LOPER-TEKST"
+    from elek_routing import loper_rects
+    for r in loper_rects(LOPER, LOPER_B):
+        h = msp.add_hatch(color=256, dxfattribs={"layer": "LOPER-GROENE-LOPER"})
+        h.paths.add_polyline_path(rect(*r), is_closed=True)
+        h.transparency = 0.45
+    # contour (unie benaderd door de rechthoeken)
+    for r in loper_rects(LOPER, LOPER_B):
+        add_rect(msp, *r, "LOPER-RAND")
+    msp.add_lwpolyline(LOPER, dxfattribs={"layer": "LOPER-AS"})
+    # looprichting
+    for a, b in zip(LOPER, LOPER[1:]):
+        l = math.hypot(b[0] - a[0], b[1] - a[1])
+        if l < 4:
+            continue
+        hoek = math.degrees(math.atan2(b[1] - a[1], b[0] - a[0]))
+        ins(msp, "VLUCHTPIJL", ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2), "LOPER-TEKST",
+            rot=hoek, scale=0.5)
+        d = msp.add_aligned_dim(p1=a, p2=b, distance=1.6 if hoek in (0, 90) else -1.6,
+                                dimstyle="CAREERDAY", dxfattribs={"layer": "LOPER-MAATVOERING"})
+        d.render()
+    add_txt(msp, "START GROENE LOPER", (LOPER[0][0] - 0.5, LOPER[0][1] + 1.6), 0.55, lay,
+            align=TextEntityAlignment.MIDDLE_LEFT)
+    add_txt(msp, "EINDE → BAR", (LOPER[-1][0] - 1.4, LOPER[-1][1]), 0.55, lay,
+            align=TextEntityAlignment.MIDDLE_RIGHT)
+
+
+def loper_lengte():
+    return sum(math.hypot(b[0] - a[0], b[1] - a[1]) for a, b in zip(LOPER, LOPER[1:]))
 
 
 # ---------------------------------------------------------------------------
@@ -652,15 +777,14 @@ def teken_noodplan(msp):
         p, _ = uitgang_pos(wand, m, off=0.6)
         p = (m + br / 2 + 0.6, p[1]) if wand in ("S", "N") else (p[0], m + br / 2 + 0.6)
         ins(msp, "BLUSSER", p, "NOOD-BLUSMIDDELEN")
-    for (x, y), _g in svb_posities():
+    for (x, y) in elek_ontwerp()["ps"]:
         ins(msp, "BLUSSER", (x + 0.9, y), "NOOD-BLUSMIDDELEN")
     ins(msp, "BLUSDEKEN", (12.0, 16.0), "NOOD-BLUSMIDDELEN")
     ins(msp, "BLUSSER", (12.0, 2.9), "NOOD-BLUSMIDDELEN")
-    ins(msp, "BLUSSER", (96.5, 24.5), "NOOD-BLUSMIDDELEN")
-    add_txt(msp, "CO₂ 5 kg", (96.5, 25.5), 0.35, lay)
-
-    ins(msp, "NOODSTOP", (HVB_POS[0], 19.0), "NOOD-HOOFDSCHAKELAAR")
-    add_txt(msp, "HOOFDSCHAKELAAR", (HVB_POS[0], 17.9), 0.4, lay)
+    for naam, (hx, hy) in HVBS:
+        ins(msp, "NOODSTOP", (hx - 1.6, hy), "NOOD-HOOFDSCHAKELAAR")
+        ins(msp, "BLUSSER", (hx + 1.4, hy), "NOOD-BLUSMIDDELEN")
+        add_txt(msp, f"HOOFDSCHAKELAAR {naam}", (hx - 1.6, hy + (0.9 if hy > 21 else -0.9)), 0.35, lay)
 
     ins(msp, "EHBO", (2.5, 33.5), "NOOD-EHBO", scale=1.4)
     add_txt(msp, "EHBO-POST", (2.5, 32.2), 0.4, lay)
@@ -710,14 +834,15 @@ def legende_items(plan):
         ("line", "BASIS-STRAMIEN", "Stramienas"),
     ]
     elek = [
-        ("HOOFDVERDEELBORD", "ELEK-HOOFDVOEDING", "Hoofdverdeelbord 125 A (HVB)"),
-        ("VERDEELBORD", "ELEK-VERDEELBORDEN", "Verdeelkast 32 A / 63 A, differentieel 30 mA"),
-        ("line", "ELEK-VOEDINGSKABELS", "Voedingskabel HVB - verdeelkast (tussengang)"),
-        ("line", "ELEK-KABELS-STANDS", "Kabeltracé vloer (stands / onthaal)"),
-        ("STOPCONTACT_230V", "ELEK-STOPCONTACTEN", "Stopcontact 230 V / 16 A (1 per stand)"),
-        ("CEE_400V", "ELEK-CEE-400V", "CEE-contactdoos 400 V / 32 A"),
-        ("ARMATUUR", "ELEK-VERLICHTING", "LED-armatuur (± 400 W) aan tentstructuur"),
-        ("line", "ELEK-KABELS-VERLICHTING", "Verlichtingskring L1-L4 (bovengronds)"),
+        ("HOOFDVERDEELBORD", "ELEK-HOOFDVOEDING", "Hoofdverdeelbord 125 A (HVB-N / HVB-Z)"),
+        ("PADDENSTOEL", "ELEK-PADDENSTOELEN", "Paddenstoel 32 A (P1 ...), differentieel 30 mA"),
+        ("KATTEKOP", "ELEK-KATTEKOPPEN", "Kattekop: 2 stopcontacten (1 per stand)"),
+        ("line", "ELEK-KABEL-05M", "Kabel 5 m (blauw)"),
+        ("line", "ELEK-KABEL-10M", "Kabel 10 m (oranje)"),
+        ("line", "ELEK-KABEL-15M", "Kabel 15 m (paars)"),
+        ("line", "ELEK-KABEL-40M", "Kabel 40 m (rood) - dik = voeding paddenstoel"),
+        ("KABELBRUG", "ELEK-KABELBRUGGEN", "Kabelbrug over looppad"),
+        ("ARMATUUR", "ELEK-VERLICHTING", "LED-armatuur aan tentstructuur (bovengronds)"),
     ]
     nood = [
         ("NOODUITGANG", "NOOD-UITGANGEN", "Nooduitgang / ingang (vrije breedte)"),
@@ -732,7 +857,13 @@ def legende_items(plan):
         ("VERZAMELPLAATS", "NOOD-VERZAMELPLAATS", "Verzamelplaats"),
         ("line", "NOOD-HULPDIENSTEN", "Toegangsweg hulpdiensten"),
     ]
-    return {"ALG": alg, "ELEK": alg[:1] + elek, "NOOD": alg[:1] + nood}[plan]
+    loper = [("rect", "LOPER-RAND", "Groene loper 2,00 m"),
+             ("VLUCHTPIJL", "LOPER-TEKST", "Looprichting bezoekers"),
+             ("line", "LOPER-AS", "As van de loper (maatvoering per deel)")]
+    if plan == "LOPER":
+        return alg[:1] + loper + alg[1:6]
+    return {"ALG": alg + loper[:1], "ELEK": alg[:1] + loper[:1] + elek,
+            "NOOD": alg[:1] + loper[:1] + nood}[plan]
 
 
 NOTITIES = {
@@ -766,15 +897,40 @@ NOTITIES = {
     ),
 }
 
+def notities(plan):
+    if plan == "ELEK":
+        m = materiaal()
+        kab = "  |  ".join(f"{n} x {l} m" for l, n in m["kabels"].items())
+        return ("{\\fArial|b1;ELEKTRISCHE NOTITIES}\\P"
+                "1. GEEN kabels op of over de groene loper: tracés berekend rond de loper; installatie volgens AREI, keuring vooraf.\\P"
+                f"2. Voeding: HVB-N, HVB-Z, HVB-W (pleinaansluitingen) + HVB-M in de tussengang \u2192 {m['paddenstoelen']} paddenstoelen 32 A, max. 3 per doorgeluste streng.\\P"
+                f"3. Elke stand 1 kattekop met 2 stopcontacten: {m['kattekoppen']} kattekoppen = {m['stopcontacten']} stopcontacten (incl. bar, vestiaire, heat ...).\\P"
+                f"4. Kabels (kleur = lengte): {kab}.\\P"
+                f"5. Kabels lopen bij voorkeur onder/achter de stands; {m['kabelbruggen']} kabelbruggen waar een looppad gekruist wordt.\\P"
+                "6. Detail per kabel en paddenstoel: materiaallijst_elektriciteit.csv. Vermogens te bevestigen door installateur.")
+    if plan == "LOPER":
+        lg = loper_lengte()
+        return ("{\\fArial|b1;GROENE LOPER \u2013 NOTITIES}\\P"
+                f"1. Groene loper 2,00 m breed, totale aslengte \u00b1 {lg:.0f} m (\u00b1 {lg * LOPER_B:.0f} m\u00b2, + snijverlies).\\P"
+                "2. Start aan de ingang van tent 1, slingert langs alle standen van tent 1, via de doorgang in de tussengang\\P"
+                "    (achteraan) naar tent 2 en eindigt bij de bar.\\P"
+                "3. Breedte en vorm zoals Career Day vorig jaar (2,00 m, segmenten 7-11 m); maten per deel op het plan.\\P"
+                "4. Op de loper komen geen kabels, kabelbruggen of materiaal; naden en hoeken stevig vastkleven (struikelgevaar).\\P"
+                "5. Loper overal min. 0,5 m vrij van standen; nooduitgangen en gangen blijven volledig bruikbaar.")
+    return NOTITIES[plan]
+
+
 TITELS = {
     "ALG": "ALGEMEEN GRONDPLAN",
     "ELEK": "ELEKTRICITEITSPLAN",
     "NOOD": "NOODPLAN / EVACUATIEPLAN",
+    "LOPER": "GROENE LOPER",
 }
 
 
 def teken_layout(doc, plan, nr):
-    naam = {"ALG": "01 Algemeen grondplan", "ELEK": "02 Elektriciteitsplan", "NOOD": "03 Noodplan"}[plan]
+    naam = {"ALG": "01 Algemeen grondplan", "ELEK": "02 Elektriciteitsplan", "NOOD": "03 Noodplan",
+            "LOPER": "04 Groene loper"}[plan]
     psp = doc.layouts.new(naam)
     psp.page_setup(size=(PW, PH), margins=(0, 0, 0, 0), units="mm",
                    name="ISO_full_bleed_A1_(841.00_x_594.00_MM)",
@@ -796,6 +952,8 @@ def teken_layout(doc, plan, nr):
     for g in ("ELEK", "NOOD"):
         if g != plan:
             bevroren += GROEPEN[g]
+    if plan != "LOPER":
+        bevroren += ["LOPER-AS", "LOPER-MAATVOERING", "LOPER-TEKST"]
     if plan != "ALG":
         bevroren += ["ALG-MAATVOERING"]
         if plan == "NOOD":
@@ -856,7 +1014,8 @@ def teken_layout(doc, plan, nr):
     y -= 6.0
     groepen = {"ALG": "BASIS-*  +  ALG-*",
                "ELEK": "BASIS-*  +  ALG-* (grijs)  +  ELEK-*",
-               "NOOD": "BASIS-*  +  ALG-* (grijs)  +  NOOD-*"}[plan]
+               "NOOD": "BASIS-*  +  ALG-* (grijs)  +  NOOD-*",
+               "LOPER": "BASIS-*  +  ALG-* (grijs)  +  LOPER-*"}[plan]
     add_txt(psp, groepen, (x0 + 5, y), 2.5, LG, align=TextEntityAlignment.MIDDLE_LEFT)
 
     # titelblok
@@ -875,15 +1034,16 @@ def teken_layout(doc, plan, nr):
             align=TextEntityAlignment.MIDDLE_LEFT)
     add_txt(psp, "INHOUD", (x0 + 3, 101.5), 2.0, K, align=TextEntityAlignment.MIDDLE_LEFT)
     inhoud = {"ALG": "128 stands, inkom, vestiaire, bar, logistiek",
-              "ELEK": "Voeding, verdeelkasten, stopcontacten, verlichting",
-              "NOOD": "Uitgangen, vluchtwegen, blusmiddelen, EHBO"}[plan]
+              "ELEK": "Paddenstoelen, kattekoppen, kabels per lengte",
+              "NOOD": "Uitgangen, vluchtwegen, blusmiddelen, EHBO",
+              "LOPER": "Route en lengtes groene loper (2,00 m)"}[plan]
     add_txt(psp, inhoud, (x0 + 5, 93.0), 3.0, K, align=TextEntityAlignment.MIDDLE_LEFT)
     add_txt(psp, "PROJECT / LOCATIE", (x0 + 3, 81.5), 2.0, K,
             align=TextEntityAlignment.MIDDLE_LEFT)
     add_txt(psp, "Sint-Pietersplein, 9000 Gent", (x0 + 5, 73.0), 3.0, K,
             align=TextEntityAlignment.MIDDLE_LEFT)
     cellen = [("SCHAAL", "1:200", x0, 65.0), ("FORMAAT", "A1 liggend", xm, 65.0),
-              ("DATUM", "17/11/2026", x0, 50.0), ("BLAD", f"{nr} / 3", xm, 50.0),
+              ("DATUM", "17/11/2026", x0, 50.0), ("BLAD", f"{nr} / 4", xm, 50.0),
               ("GETEKEND", "...............", x0, 35.0),
               ("REVISIE", "A \u2013 eerste uitgave", xm, 35.0)]
     for lbl, val, cx0, top in cellen:
@@ -894,7 +1054,7 @@ def teken_layout(doc, plan, nr):
 
     # notitieblok onder viewport
     add_rect(psp, VP_X0, 15.0, VP_X1, 185.0, K)
-    add_mtxt(psp, NOTITIES[plan], (VP_X0 + 5, 180.0), 3.2, 400.0, LG)
+    add_mtxt(psp, notities(plan), (VP_X0 + 5, 180.0), 3.2, 400.0, LG)
 
     # schaalstok 0-20 m
     sx, sy = VP_X0 + 440.0, 160.0
@@ -926,8 +1086,9 @@ def bouw(plannen, bestandsnaam):
         teken_elektriciteit(msp)
     if "NOOD" in plannen:
         teken_noodplan(msp)
+    teken_loper(msp)              # loper staat op alle plannen (kabels mogen er niet over)
     for i, p in enumerate(plannen, start=1):
-        teken_layout(doc, p, {"ALG": 1, "ELEK": 2, "NOOD": 3}[p])
+        teken_layout(doc, p, {"ALG": 1, "ELEK": 2, "NOOD": 3, "LOPER": 4}[p])
     if "Layout1" in doc.layouts:
         doc.layouts.delete("Layout1")
     # ongebruikte lagen van andere plannen verwijderen in losse bestanden
@@ -946,7 +1107,10 @@ def bouw(plannen, bestandsnaam):
 
 
 if __name__ == "__main__":
-    print(bouw(["ALG", "ELEK", "NOOD"], "Careerday_grondplannen.dxf"))
+    print(bouw(["ALG", "ELEK", "NOOD", "LOPER"], "Careerday_grondplannen.dxf"))
     print(bouw(["ALG"], "Careerday_01_algemeen_grondplan.dxf"))
     print(bouw(["ELEK"], "Careerday_02_elektriciteitsplan.dxf"))
     print(bouw(["NOOD"], "Careerday_03_noodplan.dxf"))
+    print(bouw(["LOPER"], "Careerday_04_groene_loper.dxf"))
+    schrijf_materiaallijst()
+    print("materiaal:", materiaal(), "| loper:", round(loper_lengte(), 1), "m")
