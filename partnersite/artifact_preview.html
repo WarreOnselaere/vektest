@@ -1,0 +1,560 @@
+<title>Standkeuze Career Day</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: ticket-hero op diepgroen, daarna een werkblad met het grondplan links
+   en een vaste "ticket" met de drie keuzes rechts (op gsm onder elkaar). */
+:root {
+  --green: #3C925E;        /* brand-green */
+  --green-dark: #1B4A33;   /* brand-green-dark */
+  --green-deep: #163C2A;   /* brand-green-deep */
+  --cream: #FFF6EC;        /* surface-cream */
+  --white: #FFFFFF;        /* surface-white */
+  --sage: #D7E7D1;         /* sage-ring */
+  --ink: #1E271F;
+  --ink-muted: #5E6D5F;
+  --sage-soft: #EEF5EB;
+  --stub: #F3E6D6;
+  --taken: #C9CFC7;
+  --error: #A3361F;
+  --font: 'Poppins', system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { background: var(--cream); color: var(--ink); }
+body { font-family: var(--font); font-size: 15px; line-height: 1.55; margin: 0; }
+button, input, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--green); outline-offset: 2px; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+/* ---------- hero ---------- */
+.hero { background: var(--green-deep); color: var(--cream); padding-block: 40px 56px; }
+.ticket { display: grid; grid-template-columns: 1fr auto; background: var(--cream); color: var(--ink); border-radius: 22px; position: relative; overflow: hidden; max-width: 980px; }
+.ticket-main { padding: 34px 36px 32px; min-width: 0; }
+.eyebrow { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--green-dark); background: var(--sage); border-radius: 999px; padding: 5px 14px; }
+h1 { font-weight: 800; text-transform: uppercase; letter-spacing: -.01em; line-height: 1.02; color: var(--green-dark); font-size: clamp(34px, 6vw, 64px); margin: 16px 0 10px; text-wrap: balance; }
+.lead { font-size: 17px; font-weight: 500; color: var(--ink-muted); max-width: 56ch; margin: 0; }
+.chips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+.chip { background: var(--white); border: 1.5px solid var(--sage); border-radius: 999px; padding: 6px 14px; font-size: 14px; font-weight: 700; color: var(--green-dark); }
+.stub { width: 190px; border-left: 2.5px dashed var(--sage); background: var(--stub); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 24px 16px; position: relative; }
+.stub::before, .stub::after { content: ""; position: absolute; left: -14px; width: 26px; height: 26px; border-radius: 50%; background: var(--green-deep); }
+.stub::before { top: -13px; } .stub::after { bottom: -13px; }
+.medal { width: 108px; height: 108px; border-radius: 50%; background: var(--green); color: var(--white); display: grid; place-items: center; font-weight: 800; font-size: 30px; letter-spacing: .04em; box-shadow: 0 0 0 6px var(--sage); }
+.stub small { font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--green-dark); text-align: center; }
+
+/* ---------- steps ---------- */
+.steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 28px; max-width: 980px; }
+.step { display: flex; gap: 12px; align-items: flex-start; color: var(--sage); font-size: 14px; }
+.step b { flex: none; width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--green); color: var(--cream); display: grid; place-items: center; font-size: 14px; }
+.step strong { color: var(--cream); display: block; font-weight: 600; }
+
+/* ---------- workspace ---------- */
+main { padding-block: 36px 64px; }
+.work { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 28px; align-items: start; }
+.section-label { font-size: 12px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-muted); margin: 0 0 10px; }
+h2 { font-size: 22px; font-weight: 700; color: var(--green-dark); margin: 0 0 4px; }
+.sub { color: var(--ink-muted); margin: 0 0 16px; font-size: 14px; }
+
+.planbox { background: var(--white); border: 1.5px solid var(--sage); border-radius: 18px; padding: 14px; }
+.tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.filters { display: flex; flex-wrap: wrap; gap: 6px; }
+.filter { border: 1.5px solid var(--sage); background: var(--white); border-radius: 999px; padding: 5px 12px; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--green-dark); }
+.filter[aria-pressed="true"] { background: var(--green-dark); border-color: var(--green-dark); color: var(--white); }
+.quick { display: flex; gap: 6px; align-items: center; }
+.quick input { width: 110px; border: 1.5px solid var(--sage); border-radius: 999px; padding: 5px 12px; font-size: 13px; background: var(--white); }
+.quick button { border: 0; background: var(--green); color: var(--white); border-radius: 999px; padding: 6px 14px; font-weight: 600; font-size: 13px; cursor: pointer; }
+.scroller { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 10px; }
+svg.plan { display: block; width: 100%; min-width: 760px; height: auto; user-select: none; }
+.hint { font-size: 12.5px; color: var(--ink-muted); margin: 8px 2px 0; }
+
+.tent { fill: #FBFDF9; stroke: var(--green-dark); stroke-width: .22; }
+.gang { fill: var(--sage-soft); }
+.zone { fill: var(--sage-soft); stroke: #A9C3A1; stroke-width: .1; }
+.zone.hatch { fill: url(#hatch); }
+.zone.ops { fill: #ECEFEA; stroke: #C2CABF; }
+.zlabel { font-size: 1.05px; font-weight: 600; fill: var(--ink-muted); text-anchor: middle; dominant-baseline: middle; pointer-events: none; letter-spacing: .02em; }
+.tentlabel { font-size: 1.5px; font-weight: 800; fill: var(--green-dark); letter-spacing: .12em; }
+.door { fill: var(--green); }
+.doorlbl { font-size: .95px; font-weight: 700; fill: var(--green); }
+
+.stand rect { fill: var(--white); stroke: var(--green); stroke-width: .14; transition: fill .12s; }
+.stand text { font-size: 1.15px; font-weight: 700; fill: var(--green-dark); text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+.stand { cursor: pointer; outline: none; }
+.stand:hover rect, .stand:focus-visible rect { fill: var(--sage); }
+.stand:focus-visible rect { stroke: var(--green-deep); stroke-width: .3; }
+.stand.dim rect { fill: #F4F6F2; stroke: #C3CDBF; }
+.stand.dim text { fill: #A6B1A4; }
+.stand.sel rect { fill: var(--green); stroke: var(--green-deep); }
+.stand.sel text { fill: var(--white); }
+.stand.taken { cursor: not-allowed; }
+.stand.taken rect { fill: url(#taken); stroke: var(--taken); }
+.stand.taken text { fill: #8D978B; }
+.rank circle { fill: var(--green-deep); stroke: var(--white); stroke-width: .15; }
+.rank text { font-size: .95px; font-weight: 800; fill: var(--white); text-anchor: middle; dominant-baseline: central; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 12px; font-size: 12.5px; color: var(--ink-muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.sw { width: 18px; height: 12px; border-radius: 3px; border: 1.5px solid var(--green); background: var(--white); }
+.sw.sel { background: var(--green); border-color: var(--green-deep); }
+.sw.taken { background: repeating-linear-gradient(45deg, #E3E7E1 0 3px, #FFF 3px 6px); border-color: var(--taken); }
+.sw.zone { background: var(--sage-soft); border-color: #A9C3A1; }
+
+.tip { position: fixed; z-index: 20; pointer-events: none; background: var(--green-deep); color: var(--cream); border-radius: 10px; padding: 8px 12px; font-size: 13px; line-height: 1.4; max-width: 240px; box-shadow: 0 8px 24px rgba(22,60,42,.25); }
+.tip b { font-size: 15px; }
+
+/* ---------- keuzeticket ---------- */
+aside { position: sticky; top: calc(16px + env(safe-area-inset-top, 0px)); }
+.picks { background: var(--white); border-radius: 18px; border: 1.5px solid var(--sage); overflow: hidden; }
+.picks-head { background: var(--green-deep); color: var(--cream); padding: 16px 20px; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.picks-head h2 { color: var(--cream); font-size: 18px; margin: 0; }
+.picks-head span { font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--sage); font-variant-numeric: tabular-nums; }
+.slots { list-style: none; margin: 0; padding: 8px 14px; }
+.slot { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px 4px; border-bottom: 1.5px dashed var(--sage); }
+.slot:last-child { border-bottom: 0; }
+.slot .rk { font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-muted); text-align: center; line-height: 1.2; }
+.slot .rk em { display: block; font-style: normal; font-size: 22px; font-weight: 800; color: var(--green-dark); letter-spacing: 0; }
+.slot .nr { font-size: 20px; font-weight: 800; color: var(--green-dark); line-height: 1.1; }
+.slot .meta { font-size: 12.5px; color: var(--ink-muted); line-height: 1.4; }
+.slot.empty .nr { font-size: 14px; font-weight: 600; color: #93A192; }
+.slot.empty .rk em { color: #B3BFB1; }
+.slot-actions { display: flex; gap: 4px; }
+.ib { width: 30px; height: 30px; border-radius: 50%; border: 1.5px solid var(--sage); background: var(--white); cursor: pointer; display: grid; place-items: center; color: var(--green-dark); font-size: 14px; line-height: 1; padding: 0; }
+.ib:hover { background: var(--sage-soft); }
+.ib:disabled { opacity: .35; cursor: default; background: var(--white); }
+
+form { padding: 4px 20px 20px; display: grid; gap: 12px; border-top: 1.5px solid var(--sage); padding-top: 16px; }
+.field { display: grid; gap: 4px; }
+.field label { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--green-dark); }
+.field label i { font-style: normal; font-weight: 500; letter-spacing: 0; text-transform: none; color: var(--ink-muted); }
+.field input, .field textarea { width: 100%; border: 1.5px solid var(--sage); border-radius: 10px; padding: 9px 12px; background: var(--white); font-size: 15px; }
+.field input:focus, .field textarea:focus { border-color: var(--green); outline: none; box-shadow: 0 0 0 3px var(--sage); }
+.field textarea { min-height: 76px; resize: vertical; }
+.field.bad input { border-color: var(--error); }
+.err { color: var(--error); font-size: 13px; font-weight: 500; min-height: 0; }
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.submit { border: 0; border-radius: 999px; background: var(--green); color: var(--white); font-weight: 700; font-size: 16px; padding: 13px 20px; cursor: pointer; letter-spacing: .02em; }
+.submit:hover { background: var(--green-dark); }
+.submit:disabled { opacity: .6; cursor: progress; }
+.small { font-size: 12.5px; color: var(--ink-muted); margin: 0; }
+
+/* ---------- bevestiging ---------- */
+.done { padding: 22px 20px 24px; display: grid; gap: 12px; }
+.done h3 { margin: 0; font-size: 22px; font-weight: 800; text-transform: uppercase; color: var(--green-dark); }
+.done ol { margin: 0; padding-left: 20px; font-weight: 600; }
+.summary { white-space: pre-wrap; font-size: 13px; background: var(--sage-soft); border-radius: 10px; padding: 10px 12px; margin: 0; overflow-wrap: anywhere; }
+.ghost { border: 1.5px solid var(--green); background: var(--white); color: var(--green-dark); border-radius: 999px; padding: 9px 16px; font-weight: 600; cursor: pointer; }
+
+/* ---------- info ---------- */
+.info { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; margin-top: 44px; padding-top: 28px; border-top: 1.5px solid var(--sage); }
+.info h3 { font-size: 15px; font-weight: 700; color: var(--green-dark); margin: 0 0 6px; }
+.info p { margin: 0; font-size: 14px; color: var(--ink-muted); max-width: 42ch; }
+footer { background: var(--green-deep); color: var(--sage); font-size: 13px; padding-block: 22px; }
+
+@media (max-width: 980px) {
+  .work { grid-template-columns: minmax(0, 1fr); }
+  aside { position: static; }
+}
+@media (max-width: 720px) {
+  .ticket { grid-template-columns: 1fr; }
+  .stub { width: auto; flex-direction: row; border-left: 0; border-top: 2.5px dashed var(--sage); padding: 16px; }
+  .stub::before, .stub::after { top: -14px; left: auto; }
+  .stub::before { left: -13px; } .stub::after { right: -13px; bottom: auto; }
+  .medal { width: 64px; height: 64px; font-size: 18px; box-shadow: 0 0 0 4px var(--sage); }
+  .ticket-main { padding: 26px 22px; }
+  .steps, .info { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="ticket">
+      <div class="ticket-main">
+        <span class="eyebrow" id="eyebrow">Premium partners · Career Day</span>
+        <h1>Kies je standplaats</h1>
+        <p class="lead">Geef je drie favoriete standplaatsen door, in volgorde van voorkeur. Als premium partner kies je als eerste, wij puzzelen daarna het grondplan rond.</p>
+        <div class="chips" id="chips">
+          <span class="chip">Sint-Pietersplein, Gent</span>
+          <span class="chip">2 tenten · 20 × 90 m</span>
+          <span class="chip">Standen van 2 × 3 m</span>
+        </div>
+      </div>
+      <div class="stub" aria-hidden="true">
+        <div class="medal">1·2·3</div>
+        <small>Jouw top 3</small>
+      </div>
+    </div>
+    <div class="steps">
+      <div class="step"><b>1</b><div><strong>Klik op het plan</strong>Je eerste klik wordt keuze 1, dan 2 en 3.</div></div>
+      <div class="step"><b>2</b><div><strong>Zet ze in de juiste volgorde</strong>Schuif met de pijltjes of verwijder een keuze.</div></div>
+      <div class="step"><b>3</b><div><strong>Verstuur</strong>Vul je bedrijfsgegevens in en bevestig.</div></div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="work">
+    <section aria-labelledby="plan-title">
+      <p class="section-label">Grondplan</p>
+      <h2 id="plan-title">Twee tenten, 128 standplaatsen</h2>
+      <p class="sub">Ingang links in tent 1. Beweeg over een stand voor details, klik om te kiezen.</p>
+      <div class="planbox">
+        <div class="tools">
+          <div class="filters" role="group" aria-label="Markeer standen">
+            <button type="button" class="filter" data-f="alle" aria-pressed="true">Alle</button>
+            <button type="button" class="filter" data-f="Kopstand" aria-pressed="false">Kopstanden</button>
+            <button type="button" class="filter" data-f="Wandstand" aria-pressed="false">Aan de wand</button>
+            <button type="button" class="filter" data-f="1" aria-pressed="false">Tent 1</button>
+            <button type="button" class="filter" data-f="2" aria-pressed="false">Tent 2</button>
+          </div>
+          <form class="quick" id="quick" novalidate style="padding:0;border:0;display:flex">
+            <label for="quick-nr" class="hp">Standnummer</label>
+            <input id="quick-nr" inputmode="numeric" placeholder="Standnr." autocomplete="off">
+            <button type="submit">Kies</button>
+          </form>
+        </div>
+        <div class="scroller">
+          <svg class="plan" id="plan" viewBox="-3 -4.6 96 53.4" role="group" aria-label="Grondplan met standplaatsen">
+            <defs>
+              <pattern id="hatch" width="1" height="1" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                <rect width="1" height="1" fill="#EEF5EB"/><line x1="0" y1="0" x2="0" y2="1" stroke="#BFD6B8" stroke-width=".35"/>
+              </pattern>
+              <pattern id="taken" width=".8" height=".8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                <rect width=".8" height=".8" fill="#FFFFFF"/><line x1="0" y1="0" x2="0" y2=".8" stroke="#D5DBD3" stroke-width=".3"/>
+              </pattern>
+            </defs>
+            <g id="base"></g>
+            <g id="standen"></g>
+          </svg>
+        </div>
+        <div class="legend" aria-hidden="true">
+          <span><i class="sw"></i>Vrij</span>
+          <span><i class="sw sel"></i>Jouw keuze</span>
+          <span><i class="sw taken"></i>Niet beschikbaar</span>
+          <span><i class="sw zone"></i>Faciliteiten</span>
+        </div>
+      </div>
+      <p class="hint">Op een smal scherm kan je het plan horizontaal verschuiven. Indeling op basis van Career Day 25–26; kleine verschuivingen zijn mogelijk.</p>
+    </section>
+
+    <aside aria-labelledby="picks-title">
+      <div class="picks" id="picks">
+        <div class="picks-head"><h2 id="picks-title">Jouw voorkeuren</h2><span id="count">0 / 3 gekozen</span></div>
+        <ol class="slots" id="slots"></ol>
+        <form id="form" novalidate>
+          <div class="field" id="f-bedrijf"><label for="bedrijf">Bedrijf</label><input id="bedrijf" name="bedrijf" autocomplete="organization" required></div>
+          <div class="field" id="f-contact"><label for="contact">Contactpersoon</label><input id="contact" name="contact" autocomplete="name" required></div>
+          <div class="field" id="f-email"><label for="email">E-mail</label><input id="email" name="email" type="email" autocomplete="email" required></div>
+          <div class="field"><label for="tel">Telefoon <i>(optioneel)</i></label><input id="tel" name="tel" type="tel" autocomplete="tel"></div>
+          <div class="field"><label for="opm">Opmerkingen <i>(optioneel)</i></label><textarea id="opm" name="opm" placeholder="Bv. extra stroom nodig, niet naast een concurrent, grote banner…"></textarea></div>
+          <div class="hp" aria-hidden="true"><label for="website">Website</label><input id="website" name="website" tabindex="-1" autocomplete="off"></div>
+          <p class="err" id="err" role="alert"></p>
+          <button class="submit" id="submit" type="submit">Verstuur mijn voorkeuren</button>
+          <p class="small">We proberen iedereen zijn eerste keuze te geven. Kiezen meerdere partners dezelfde plaats, dan nemen we contact op.</p>
+        </form>
+        <div class="done" id="done" hidden></div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="info">
+    <div><h3>Wat zit er bij een stand?</h3><p>Een standplaats van 2 × 3 m, op 30 cm van de tentwand. Stroom voorzien we per stand; laat in de opmerkingen weten als je meer nodig hebt.</p></div>
+    <div><h3>Wat betekent kopstand?</h3><p>Een stand met minstens drie open zijden, aan het einde van een rij. Wandstanden staan tegen de tentwand, eilandstanden staan rug aan rug in het midden.</p></div>
+    <div><h3>Iets veranderen?</h3><p>Verstuur gewoon opnieuw met dezelfde bedrijfsnaam. We houden je laatste inzending aan.</p></div>
+  </div>
+</main>
+
+<footer><div class="wrap">VEK Recruitment · Career Day · Standkeuze premium partners</div></footer>
+
+<div class="tip" id="tip" hidden></div>
+
+<script>
+/* ---------------- instellingen ----------------
+   ENDPOINT: de URL van de Google Apps Script web-app (zie README).
+   Leeg = demomodus: er wordt niets verstuurd, de partner krijgt een samenvatting om te kopiëren. */
+const CONFIG = {
+  ENDPOINT: "",
+  EDITIE: "Career Day 26–27",
+  DEADLINE: "",                 // bv. "15 december 2026" – leeg = niet tonen
+  NIET_BESCHIKBAAR: []          // standnummers die niet gekozen kunnen worden, bv. [36, 37, 38]
+};
+
+/* [nr, x, y, w, h, tent, soort, openZijden, mVanIngang] – meter, uit grondplan 25–26 */
+const STANDEN = [[1,27.35,22.26,3.0,2.0,"1","Wandstand",2,35],[2,30.57,22.37,3.0,2.0,"1","Wandstand",2,35],[3,33.98,26.21,2.0,3.0,"1","Eilandstand",2,35],[4,33.98,29.5,2.0,3.0,"1","Eilandstand",1,35],[5,33.98,32.8,2.0,3.0,"1","Eilandstand",2,35],[6,28.6,28.49,2.0,3.0,"1","Kopstand",3,30],[7,28.6,31.78,2.0,3.0,"1","Eilandstand",2,30],[8,28.6,35.09,2.0,3.0,"1","Kopstand",3,30],[9,31.33,39.73,3.0,2.0,"1","Wandstand",3,35],[10,34.7,39.73,3.0,2.0,"1","Wandstand",2,35],[11,37.7,39.71,3.0,2.0,"1","Wandstand",2,40],[12,41.0,35.0,2.0,3.0,"1","Eilandstand",2,40],[13,41.0,31.7,2.0,3.0,"1","Eilandstand",1,45],[14,41.0,28.41,2.0,3.0,"1","Eilandstand",2,45],[15,35.97,32.8,2.0,3.0,"1","Eilandstand",2,35],[16,35.97,29.5,2.0,3.0,"1","Eilandstand",1,40],[17,35.97,26.21,2.0,3.0,"1","Eilandstand",2,40],[18,38.47,22.31,3.0,2.0,"1","Wandstand",2,45],[19,41.47,22.31,3.0,2.0,"1","Wandstand",1,45],[20,44.47,22.29,3.0,2.0,"1","Wandstand",2,50],[21,47.97,26.21,2.0,3.0,"1","Eilandstand",2,50],[22,47.97,29.5,2.0,3.0,"1","Eilandstand",1,50],[23,47.97,32.8,2.0,3.0,"1","Eilandstand",2,50],[24,42.99,28.41,2.0,3.0,"1","Eilandstand",2,45],[25,42.99,31.7,2.0,3.0,"1","Eilandstand",1,45],[26,42.99,35.0,2.0,3.0,"1","Eilandstand",2,45],[27,45.47,39.73,3.0,2.0,"1","Wandstand",2,45],[28,48.57,39.73,3.0,2.0,"1","Wandstand",1,50],[29,51.57,39.71,3.0,2.0,"1","Wandstand",2,55],[30,54.97,35.99,2.0,3.0,"1","Eilandstand",2,55],[31,54.97,32.7,2.0,3.0,"1","Eilandstand",1,55],[32,54.97,29.41,2.0,3.0,"1","Eilandstand",2,55],[33,49.96,32.8,2.0,3.0,"1","Eilandstand",2,50],[34,49.96,29.5,2.0,3.0,"1","Eilandstand",1,50],[35,49.96,26.21,2.0,3.0,"1","Eilandstand",2,50],[36,52.38,23.23,3.0,2.0,"1","Kopstand",3,55],[37,55.52,23.23,3.0,2.0,"1","Eilandstand",2,60],[38,58.55,23.29,3.0,2.0,"1","Kopstand",3,60],[39,61.94,26.21,2.0,3.0,"1","Eilandstand",2,65],[40,61.94,29.5,2.0,3.0,"1","Eilandstand",1,65],[41,61.94,32.8,2.0,3.0,"1","Eilandstand",2,65],[42,56.96,29.41,2.0,3.0,"1","Eilandstand",2,60],[43,56.96,32.7,2.0,3.0,"1","Eilandstand",1,60],[44,56.96,35.99,2.0,3.0,"1","Eilandstand",2,60],[45,59.46,39.73,3.0,2.0,"1","Wandstand",2,60],[46,62.56,39.73,3.0,2.0,"1","Wandstand",1,65],[47,65.56,39.71,3.0,2.0,"1","Wandstand",2,65],[48,68.96,35.0,2.0,3.0,"1","Eilandstand",2,70],[49,68.96,31.7,2.0,3.0,"1","Eilandstand",1,70],[50,68.96,28.41,2.0,3.0,"1","Eilandstand",2,70],[51,63.95,32.8,2.0,3.0,"1","Eilandstand",2,65],[52,63.95,29.5,2.0,3.0,"1","Eilandstand",1,65],[53,63.95,26.21,2.0,3.0,"1","Eilandstand",2,65],[54,66.37,22.26,3.0,2.0,"1","Wandstand",2,70],[55,69.47,22.26,3.0,2.0,"1","Wandstand",1,75],[56,72.47,22.29,3.0,2.0,"1","Wandstand",2,75],[57,76.46,26.21,2.0,3.0,"1","Eilandstand",2,80],[58,76.46,29.5,2.0,3.0,"1","Eilandstand",1,80],[59,76.46,32.8,2.0,3.0,"1","Eilandstand",2,80],[60,70.95,28.41,2.0,3.0,"1","Eilandstand",2,75],[61,70.95,31.7,2.0,3.0,"1","Eilandstand",1,70],[62,70.95,35.0,2.0,3.0,"1","Eilandstand",2,70],[63,73.49,39.65,3.0,2.0,"1","Wandstand",2,75],[64,76.54,39.71,3.0,2.0,"1","Wandstand",2,80],[65,84.46,36.09,2.0,3.0,"1","Kopstand",3,85],[66,84.46,32.8,2.0,3.0,"1","Eilandstand",2,85],[67,84.46,29.5,2.0,3.0,"1","Eilandstand",2,85],[68,84.46,26.21,2.0,3.0,"1","Eilandstand",2,85],[69,84.46,22.9,2.0,3.0,"1","Kopstand",3,85],[70,78.44,32.8,2.0,3.0,"1","Eilandstand",2,80],[71,78.44,29.5,2.0,3.0,"1","Eilandstand",1,80],[72,78.44,26.21,2.0,3.0,"1","Eilandstand",1,80],[73,78.44,22.9,2.0,3.0,"1","Kopstand",3,80],[74,78.44,16.09,2.0,3.0,"2","Kopstand",3,95],[75,78.44,12.78,2.0,3.0,"2","Eilandstand",1,95],[76,78.44,9.5,2.0,3.0,"2","Eilandstand",1,95],[77,78.44,6.19,2.0,3.0,"2","Eilandstand",2,95],[78,84.46,16.09,2.0,3.0,"2","Kopstand",3,100],[79,84.46,12.78,2.0,3.0,"2","Eilandstand",2,100],[80,84.46,9.5,2.0,3.0,"2","Eilandstand",2,100],[81,84.46,6.19,2.0,3.0,"2","Eilandstand",2,100],[82,84.46,2.9,2.0,3.0,"2","Kopstand",3,100],[83,76.46,0.38,3.0,2.0,"2","Wandstand",2,95],[84,73.32,0.36,3.0,2.0,"2","Wandstand",2,90],[85,76.46,6.19,2.0,3.0,"2","Eilandstand",2,95],[86,76.46,9.5,2.0,3.0,"2","Eilandstand",1,95],[87,76.46,12.78,2.0,3.0,"2","Eilandstand",2,90],[88,70.95,3.99,2.0,3.0,"2","Eilandstand",2,90],[89,70.95,7.3,2.0,3.0,"2","Eilandstand",1,90],[90,70.95,10.61,2.0,3.0,"2","Eilandstand",2,85],[91,72.51,17.68,3.0,2.0,"2","Wandstand",2,90],[92,69.51,17.7,3.0,2.0,"2","Wandstand",1,85],[93,66.37,17.7,3.0,2.0,"2","Wandstand",2,85],[94,63.95,12.78,2.0,3.0,"2","Eilandstand",2,80],[95,63.95,9.5,2.0,3.0,"2","Eilandstand",1,80],[96,63.95,6.19,2.0,3.0,"2","Eilandstand",2,80],[97,68.96,10.61,2.0,3.0,"2","Eilandstand",2,85],[98,68.96,7.3,2.0,3.0,"2","Eilandstand",1,85],[99,68.96,3.99,2.0,3.0,"2","Eilandstand",2,85],[100,65.48,0.3,3.0,2.0,"2","Wandstand",2,85],[101,62.5,0.31,3.0,2.0,"2","Wandstand",1,80],[102,59.36,0.31,3.0,2.0,"2","Wandstand",2,80],[103,56.96,2.98,2.0,3.0,"2","Eilandstand",2,75],[104,56.96,6.29,2.0,3.0,"2","Eilandstand",1,75],[105,56.96,9.6,2.0,3.0,"2","Eilandstand",2,75],[106,61.94,6.19,2.0,3.0,"2","Eilandstand",2,80],[107,61.94,9.5,2.0,3.0,"2","Eilandstand",1,80],[108,61.94,12.78,2.0,3.0,"2","Eilandstand",2,80],[109,58.63,16.72,3.0,2.0,"2","Kopstand",3,75],[110,55.63,16.77,3.0,2.0,"2","Eilandstand",2,70],[111,52.49,16.77,3.0,2.0,"2","Kopstand",3,70],[112,49.96,12.78,2.0,3.0,"2","Eilandstand",2,65],[113,49.96,9.5,2.0,3.0,"2","Eilandstand",1,65],[114,49.96,6.19,2.0,3.0,"2","Eilandstand",2,65],[115,54.97,9.6,2.0,3.0,"2","Eilandstand",2,70],[116,54.97,6.29,2.0,3.0,"2","Eilandstand",1,70],[117,54.97,2.98,2.0,3.0,"2","Eilandstand",2,75],[118,51.64,0.3,3.0,2.0,"2","Wandstand",2,70],[119,48.64,0.27,3.0,2.0,"2","Wandstand",1,70],[120,45.53,0.27,3.0,2.0,"2","Wandstand",2,65],[121,42.99,3.99,2.0,3.0,"2","Kopstand",3,60],[122,42.99,7.3,2.0,3.0,"2","Eilandstand",2,60],[123,42.99,10.61,2.0,3.0,"2","Kopstand",3,60],[124,47.97,6.19,2.0,3.0,"2","Eilandstand",2,65],[125,47.97,9.5,2.0,3.0,"2","Eilandstand",1,65],[126,47.97,12.78,2.0,3.0,"2","Eilandstand",2,65],[127,44.41,17.68,3.0,2.0,"2","Wandstand",2,60],[128,41.3,17.7,3.0,2.0,"2","Wandstand",2,60]];
+
+/* ---------------- grondplan ---------------- */
+const NS = "http://www.w3.org/2000/svg";
+const H = 46;                       // svg-y = H - modelY
+const $ = (s) => document.querySelector(s);
+const el = (tag, attrs = {}, parent) => {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+};
+const R = (x0, y0, x1, y1) => ({ x: x0, y: H - y1, width: x1 - x0, height: y1 - y0 });
+
+function tekenBasis() {
+  const g = $("#base");
+  el("rect", { ...R(0, 20, 90, 22), class: "gang" }, g);
+  el("rect", { ...R(0, 22, 90, 42), class: "tent" }, g);
+  el("rect", { ...R(0, 0, 90, 20), class: "tent" }, g);
+  // tussengang met openingen
+  el("line", { x1: 10, y1: H - 21, x2: 85, y2: H - 21, stroke: "#B9CDB3", "stroke-width": .12, "stroke-dasharray": ".6 .4" }, g);
+  const zones = [
+    ["Inkom", 0, 22, 5, 42, "zone"],
+    ["Vestiaire", 5, 22, 14, 32, "zone"],
+    ["", 14, 22, 20.9, 25.5, "zone"],
+    ["CV-check", 5, 34, 11, 42, "zone hatch"],
+    ["Lanyards", 16, 34, 23, 35.2, "zone"],
+    ["Goodies", 26.6, 30.8, 28.2, 33.6, "zone"],
+    ["Recruiters Zone", 48.1, 22.3, 65.7, 25.6, "zone hatch"],
+    ["Loading bay", 86.5, 22, 90, 42, "zone ops"],
+    ["Logistiek", 0, 0, 10, 20, "zone ops"],
+    ["Bar", 10.5, 3.9, 13.5, 15, "zone"],
+    ["Loading bay", 14.2, 0, 17.7, 20, "zone ops"],
+    ["CV-screening", 20.6, 16.7, 27.6, 19.7, "zone hatch"],
+    ["Photobooth", 29.7, 16.7, 35.7, 19.7, "zone"],
+    ["Recruiters Zone", 48.1, 16.5, 65.7, 19.7, "zone hatch"],
+    ["Toilet", 78.4, 46, 86.4, 49, "zone"],
+  ];
+  for (const [t, x0, y0, x1, y1, c] of zones) {
+    el("rect", { ...R(x0, y0, x1, y1), class: c, rx: .3 }, g);
+    if (!t) continue;
+    const vert = (y1 - y0) > (x1 - x0) * 1.6 && (x1 - x0) < 5;
+    const tx = el("text", { x: (x0 + x1) / 2, y: H - (y0 + y1) / 2, class: "zlabel" }, g);
+    if (vert) tx.setAttribute("transform", `rotate(-90 ${(x0 + x1) / 2} ${H - (y0 + y1) / 2})`);
+    tx.textContent = t;
+  }
+  // ingang / uitgang
+  for (const [lbl, y] of [["INGANG", 39.5], ["UITGANG", 24.5]]) {
+    el("rect", { x: -0.5, y: H - y - 1.25, width: .7, height: 2.5, class: "door", rx: .15 }, g);
+    const t = el("text", { x: -1.4, y: H - y, class: "doorlbl", "text-anchor": "middle", transform: `rotate(-90 -1.4 ${H - y})` }, g);
+    t.textContent = lbl;
+  }
+  // nooduitgangen (indicatief)
+  for (const [x, y] of [[28, 42], [57.5, 42], [33, 0], [57, 0], [82.5, 0]]) {
+    el("rect", { x: x - 1, y: H - y - .3, width: 2, height: .6, class: "door", opacity: .55 }, g);
+  }
+  const t1 = el("text", { x: 1, y: H - 43.2, class: "tentlabel" }, g); t1.textContent = "TENT 1";
+  const t2 = el("text", { x: 1, y: H + 1.9, class: "tentlabel" }, g); t2.textContent = "TENT 2";
+  const sc = el("g", { transform: `translate(70 ${H + 1.2})` }, g);
+  el("line", { x1: 0, y1: 0, x2: 10, y2: 0, stroke: "#5E6D5F", "stroke-width": .15 }, sc);
+  for (const x of [0, 5, 10]) el("line", { x1: x, y1: -.3, x2: x, y2: .3, stroke: "#5E6D5F", "stroke-width": .15 }, sc);
+  const s = el("text", { x: 11, y: .35, class: "zlabel", "text-anchor": "start" }, sc); s.textContent = "10 m";
+}
+
+/* ---------------- staat ---------------- */
+const keuze = [null, null, null];
+const byNr = new Map(STANDEN.map((s) => [s[0], s]));
+const nodes = new Map();
+const nietBeschikbaar = new Set(CONFIG.NIET_BESCHIKBAAR);
+let filter = "alle";
+
+function info(s) {
+  const [nr, , , , , tent, soort, open, ing] = s;
+  return { nr, tent, soort, open, ing, tekst: `Tent ${tent} · ${soort} · ${open} open ${open === 1 ? "zijde" : "zijden"} · ± ${ing} m van de ingang` };
+}
+
+function tekenStanden() {
+  const g = $("#standen");
+  for (const s of STANDEN) {
+    const [nr, x, y, w, h] = s;
+    const taken = nietBeschikbaar.has(nr);
+    const sg = el("g", { class: "stand" + (taken ? " taken" : ""), tabindex: taken ? -1 : 0, role: "button", "data-nr": nr,
+      "aria-label": `Stand ${nr}, ${info(s).tekst}${taken ? ", niet beschikbaar" : ""}` }, g);
+    el("rect", { x, y: H - y - h, width: w, height: h, rx: .15 }, sg);
+    const t = el("text", { x: x + w / 2, y: H - y - h / 2 }, sg); t.textContent = nr;
+    const rk = el("g", { class: "rank" }, sg); rk.style.display = "none";
+    el("circle", { cx: x + w - .15, cy: H - y - h + .15, r: .62 }, rk);
+    el("text", { x: x + w - .15, y: H - y - h + .17 }, rk);
+    nodes.set(nr, sg);
+    if (taken) continue;
+    sg.addEventListener("click", () => toggle(nr));
+    sg.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(nr); } });
+    sg.addEventListener("pointerenter", (e) => toonTip(s, e));
+    sg.addEventListener("pointermove", (e) => plaatsTip(e));
+    sg.addEventListener("pointerleave", verbergTip);
+    sg.addEventListener("focus", () => { const r = sg.getBoundingClientRect(); toonTip(s, { clientX: r.right, clientY: r.top }); });
+    sg.addEventListener("blur", verbergTip);
+  }
+}
+
+const tip = $("#tip");
+function toonTip(s, e) {
+  const i = info(s);
+  tip.innerHTML = "";
+  const b = document.createElement("b"); b.textContent = `Stand ${i.nr}`;
+  const d = document.createElement("div"); d.textContent = `Tent ${i.tent} · ${i.soort}`;
+  const d2 = document.createElement("div"); d2.textContent = `${i.open} open ${i.open === 1 ? "zijde" : "zijden"} · ± ${i.ing} m van de ingang`;
+  const pos = keuze.indexOf(i.nr);
+  const d3 = document.createElement("div"); d3.style.opacity = .8; d3.textContent = pos >= 0 ? `Jouw keuze ${pos + 1} · klik om te verwijderen` : "Klik om te kiezen";
+  tip.append(b, d, d2, d3);
+  tip.hidden = false; plaatsTip(e);
+}
+function plaatsTip(e) {
+  const pad = 14, w = tip.offsetWidth, h = tip.offsetHeight;
+  let x = e.clientX + pad, y = e.clientY + pad;
+  if (x + w > innerWidth - 8) x = e.clientX - w - pad;
+  if (y + h > innerHeight - 8) y = e.clientY - h - pad;
+  tip.style.left = Math.max(8, x) + "px"; tip.style.top = Math.max(8, y) + "px";
+}
+function verbergTip() { tip.hidden = true; }
+
+function toggle(nr) {
+  const i = keuze.indexOf(nr);
+  if (i >= 0) { keuze.splice(i, 1); keuze.push(null); }
+  else {
+    const vrij = keuze.indexOf(null);
+    if (vrij < 0) { melding("Je hebt al drie keuzes. Verwijder er eerst één."); return; }
+    keuze[vrij] = nr;
+  }
+  melding(""); render(); bewaar();
+}
+function verplaats(i, d) {
+  const j = i + d; if (j < 0 || j > 2 || keuze[i] == null || keuze[j] == null) return;
+  [keuze[i], keuze[j]] = [keuze[j], keuze[i]]; render(); bewaar();
+}
+function wis(i) { keuze.splice(i, 1); keuze.push(null); render(); bewaar(); }
+
+function render() {
+  for (const [nr, n] of nodes) {
+    const pos = keuze.indexOf(nr);
+    const s = byNr.get(nr);
+    n.classList.toggle("sel", pos >= 0);
+    const match = filter === "alle" || s[6] === filter || s[5] === filter;
+    n.classList.toggle("dim", !match && pos < 0 && !nietBeschikbaar.has(nr));
+    const rk = n.querySelector(".rank");
+    rk.style.display = pos >= 0 ? "" : "none";
+    rk.querySelector("text").textContent = pos + 1;
+  }
+  const ul = $("#slots"); ul.innerHTML = "";
+  const labels = ["1e", "2e", "3e"];
+  keuze.forEach((nr, i) => {
+    const li = document.createElement("li");
+    li.className = "slot" + (nr == null ? " empty" : "");
+    const rk = document.createElement("div"); rk.className = "rk";
+    const em = document.createElement("em"); em.textContent = i + 1;
+    rk.append(em, document.createTextNode("keuze"));
+    const body = document.createElement("div"); body.style.minWidth = 0;
+    const n = document.createElement("div"); n.className = "nr";
+    const m = document.createElement("div"); m.className = "meta";
+    if (nr == null) { n.textContent = i === keuze.indexOf(null) ? "Klik een stand op het plan" : "Nog leeg"; m.textContent = `${labels[i]} voorkeur`; }
+    else { const inf = info(byNr.get(nr)); n.textContent = `Stand ${nr}`; m.textContent = inf.tekst; }
+    body.append(n, m);
+    const act = document.createElement("div"); act.className = "slot-actions";
+    if (nr != null) {
+      act.append(
+        knop("↑", `Stand ${nr} hoger zetten`, () => verplaats(i, -1), i === 0),
+        knop("↓", `Stand ${nr} lager zetten`, () => verplaats(i, 1), i === 2 || keuze[i + 1] == null),
+        knop("✕", `Stand ${nr} verwijderen`, () => wis(i), false));
+    }
+    li.append(rk, body, act); ul.appendChild(li);
+  });
+  const n = keuze.filter((x) => x != null).length;
+  $("#count").textContent = `${n} / 3 gekozen`;
+}
+function knop(txt, label, fn, disabled) {
+  const b = document.createElement("button");
+  b.type = "button"; b.className = "ib"; b.textContent = txt; b.title = label; b.setAttribute("aria-label", label);
+  b.disabled = disabled; b.addEventListener("click", fn); return b;
+}
+function melding(t) { $("#err").textContent = t; }
+
+/* filters + snelkeuze */
+document.querySelectorAll(".filter").forEach((b) => b.addEventListener("click", () => {
+  filter = b.dataset.f;
+  document.querySelectorAll(".filter").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+  render();
+}));
+$("#quick").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const v = parseInt($("#quick-nr").value, 10);
+  if (!byNr.has(v)) { melding(`Stand ${$("#quick-nr").value || "?"} bestaat niet. Kies een nummer van 1 tot ${STANDEN.length}.`); return; }
+  if (nietBeschikbaar.has(v)) { melding(`Stand ${v} is niet beschikbaar.`); return; }
+  if (keuze.includes(v)) { melding(`Stand ${v} staat al in je keuzes.`); return; }
+  toggle(v); $("#quick-nr").value = "";
+});
+
+/* concept bewaren in deze browser */
+const KEY = "careerday-standkeuze";
+function bewaar() {
+  try {
+    const f = {}; for (const id of ["bedrijf", "contact", "email", "tel", "opm"]) f[id] = $("#" + id).value;
+    localStorage.setItem(KEY, JSON.stringify({ keuze, f }));
+  } catch (e) {}
+}
+function laad() {
+  try {
+    const d = JSON.parse(localStorage.getItem(KEY) || "null"); if (!d) return;
+    (d.keuze || []).slice(0, 3).forEach((nr, i) => { keuze[i] = byNr.has(nr) && !nietBeschikbaar.has(nr) ? nr : null; });
+    const rest = keuze.filter((x) => x != null); keuze.splice(0, 3, ...rest, ...[null, null, null].slice(rest.length));
+    for (const id in (d.f || {})) if ($("#" + id)) $("#" + id).value = d.f[id];
+  } catch (e) {}
+}
+document.querySelectorAll("#form input, #form textarea").forEach((x) => x.addEventListener("input", () => { x.closest(".field")?.classList.remove("bad"); bewaar(); }));
+
+/* versturen */
+function samenvatting(d) {
+  return [`Standkeuze ${CONFIG.EDITIE}`, `Bedrijf: ${d.bedrijf}`, `Contact: ${d.contact} (${d.email}${d.tel ? ", " + d.tel : ""})`,
+    `1e keuze: stand ${d.keuze1}`, `2e keuze: ${d.keuze2 ? "stand " + d.keuze2 : "-"}`, `3e keuze: ${d.keuze3 ? "stand " + d.keuze3 : "-"}`,
+    d.opmerkingen ? `Opmerkingen: ${d.opmerkingen}` : ""].filter(Boolean).join("\n");
+}
+$("#form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  if ($("#website").value) return;                       // spam-val
+  let ok = true;
+  for (const id of ["bedrijf", "contact", "email"]) {
+    const inp = $("#" + id); const bad = !inp.value.trim() || (id === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inp.value.trim()));
+    $("#f-" + id).classList.toggle("bad", bad); if (bad) ok = false;
+  }
+  if (keuze[0] == null) { melding("Kies minstens één standplaats op het plan."); return; }
+  if (!ok) { melding("Vul bedrijf, contactpersoon en een geldig e-mailadres in."); return; }
+  melding("");
+  const d = { editie: CONFIG.EDITIE, bedrijf: $("#bedrijf").value.trim(), contact: $("#contact").value.trim(), email: $("#email").value.trim(),
+    tel: $("#tel").value.trim(), keuze1: keuze[0], keuze2: keuze[1] ?? "", keuze3: keuze[2] ?? "", opmerkingen: $("#opm").value.trim() };
+  const btn = $("#submit"); btn.disabled = true; btn.textContent = "Versturen…";
+  let verstuurd = false;
+  if (CONFIG.ENDPOINT) {
+    try {
+      await fetch(CONFIG.ENDPOINT, { method: "POST", mode: "no-cors", body: new URLSearchParams(Object.entries(d).map(([k, v]) => [k, String(v)])) });
+      verstuurd = true;
+    } catch (err) {
+      btn.disabled = false; btn.textContent = "Verstuur mijn voorkeuren";
+      melding("Versturen lukte niet. Controleer je internetverbinding en probeer opnieuw.");
+      return;
+    }
+  }
+  toonBevestiging(d, verstuurd);
+});
+function toonBevestiging(d, verstuurd) {
+  $("#form").hidden = true;
+  const box = $("#done"); box.hidden = false; box.innerHTML = "";
+  const h = document.createElement("h3"); h.textContent = verstuurd ? "Ontvangen!" : "Bijna klaar";
+  const p = document.createElement("p"); p.className = "small";
+  p.textContent = verstuurd
+    ? `Bedankt, ${d.contact}. We hebben de voorkeuren van ${d.bedrijf} goed ontvangen en laten je weten welke plaats je krijgt.`
+    : "Deze pagina staat in demomodus en verstuurt nog niets. Kopieer de samenvatting en stuur ze naar je contactpersoon bij VEK Recruitment.";
+  const pre = document.createElement("pre"); pre.className = "summary"; pre.textContent = samenvatting(d);
+  const row = document.createElement("div"); row.style.display = "flex"; row.style.gap = "8px"; row.style.flexWrap = "wrap";
+  const kop = document.createElement("button"); kop.className = "ghost"; kop.type = "button"; kop.textContent = "Kopieer samenvatting";
+  kop.addEventListener("click", () => {
+    navigator.clipboard?.writeText(pre.textContent).then(() => { kop.textContent = "Gekopieerd"; }, () => selecteer(pre));
+    if (!navigator.clipboard) selecteer(pre);
+  });
+  const wijzig = document.createElement("button"); wijzig.className = "ghost"; wijzig.type = "button"; wijzig.textContent = "Keuzes aanpassen";
+  wijzig.addEventListener("click", () => { box.hidden = true; $("#form").hidden = false; const b = $("#submit"); b.disabled = false; b.textContent = "Verstuur mijn voorkeuren"; });
+  row.append(kop, wijzig);
+  box.append(h, p, pre, row);
+  box.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+function selecteer(node) { const r = document.createRange(); r.selectNodeContents(node); const s = getSelection(); s.removeAllRanges(); s.addRange(r); }
+
+/* start */
+$("#eyebrow").textContent = `Premium partners · ${CONFIG.EDITIE}`;
+if (CONFIG.DEADLINE) { const c = document.createElement("span"); c.className = "chip"; c.textContent = `Deadline ${CONFIG.DEADLINE}`; $("#chips").prepend(c); }
+tekenBasis(); tekenStanden(); laad(); render();
+</script>

@@ -1,6 +1,8 @@
 # Careerday – grondplannen (AutoCAD)
 
-Twee tenten van **20 m × 90 m**, lange zijden tegen elkaar (samen 40 m × 90 m, 3.600 m²).
+Twee tenten van **20 m × 90 m** op het Sint-Pietersplein (Gent), met een tussengang van 2 m.
+Indeling, zones en de 128 standposities zijn overgenomen uit het grondplan **Career Day 25–26**
+(posities rechtstreeks uit de vectoren van de PDF gehaald → `data/stands_2526.json`).
 
 ## Bestanden
 
@@ -27,8 +29,8 @@ Openen in AutoCAD: gewoon de `.dxf` openen, daarna `SAVEAS` → `.dwg`.
 
 | Groep | Lagen |
 |---|---|
-| `BASIS-` | TENT, TENT-KOPPELING, TENT-PALEN, STRAMIEN, STRAMIEN-TEKST, OMGEVING, OMGEVING-TEKST |
-| `ALG-` | STANDS, STANDS-ARCERING, STANDNUMMERS, ONTHAAL, CATERING, MEUBILAIR, SANITAIR, ZONES-TEKST, MAATVOERING |
+| `BASIS-` | TENT, TENT-KOPPELING (tussengang), TENT-PALEN, STRAMIEN, STRAMIEN-TEKST, OMGEVING, OMGEVING-TEKST |
+| `ALG-` | STANDS, STANDS-ARCERING, STANDNUMMERS, ONTHAAL, ZONES, LOGISTIEK, CATERING, SANITAIR, ZONES-TEKST, MAATVOERING |
 | `ELEK-` | HOOFDVOEDING, VOEDINGSKABELS, VERDEELBORDEN, KABELS-STANDS, STOPCONTACTEN, CEE-400V, VERLICHTING, KABELS-VERLICHTING, KABELBRUGGEN, TEKST |
 | `NOOD-` | UITGANGEN, VLUCHTWEGEN, NOODVERLICHTING, BLUSMIDDELEN, EHBO, VERZAMELPLAATS, HULPDIENSTEN, HOOFDSCHAKELAAR, TEKST |
 | `KADER-` | TITELBLOK, LEGENDE, VIEWPORT (niet plotten) |
@@ -37,9 +39,14 @@ Elke laag heeft een omschrijving (zichtbaar in de Layer Properties Manager).
 
 ## Aannames (aan te passen)
 
-- 160 stands van 3 × 3 m (A01–A80, B01–B80), gangen 4 m, dwarsgang 4 m in het midden.
-- Onthaal + vestiaire + EHBO aan de westkop, bar/netwerkzone aan de oostkop, sanitaire unit buiten (west).
-- Aggregaat 250 kVA + hoofdverdeelbord buiten aan de oostkop; 4 subverdeelborden; 1 stopcontact 16 A per stand;
-  36 LED-armaturen op 4 kringen. Vermogensbalans is indicatief.
-- 2 hoofdingangen (4,00 m) + 8 nooduitgangen (2,40 m); verzamelplaats aan de noordzijde.
-- Staanders h.o.h. 5 m, terrein, noordrichting en hydrant zijn indicatief.
+- Stands 2 × 3 m, nummers 1–73 (tent 1, ingangszijde) en 74–128 (tent 2), zoals vorig jaar.
+- Zones zoals 25–26: inkom, vestiaire, CV-check, lanyards, goodies, recruiters zones, CV-screening,
+  photobooth, bar, logistieke zone, 2 loading bays, toiletten en 4 heat-units buiten.
+- Elektriciteit: HVB 125 A achteraan, hoofdkabel door de tussengang, 10 verdeelkasten 32 A
+  (stands automatisch per kast gegroepeerd) + 63-1 algemeen, 1 stopcontact per stand, 36 LED-armaturen.
+- Noodplan: ingang + uitgang (3 m) en 8 nooduitgangen (2,4 m) op de plaatsen van de deuren van vorig jaar;
+  vluchtpijlen wijzen automatisch naar de dichtste uitgang. Verzamelplaats en brandkraan: te bevestigen met stad Gent.
+- Staanders h.o.h. 5 m en de omgeving zijn indicatief.
+
+Aanpassen: wijzig `data/stands_2526.json` (posities) of de lijsten `ZONES` / `UITGANGEN` in het script
+en draai `python3 genereer_grondplannen.py`; voorbeeld-PDF's met `python3 maak_preview.py Careerday_grondplannen.dxf preview`.

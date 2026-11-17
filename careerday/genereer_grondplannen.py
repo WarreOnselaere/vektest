@@ -29,41 +29,49 @@ from ezdxf.enums import TextEntityAlignment, MTextEntityAlignment
 OUT = Path(__file__).resolve().parent
 
 # ---------------------------------------------------------------------------
-# Afmetingen
+# Afmetingen – indeling Career Day 25-26 (Sint-Pietersplein, Gent)
 # ---------------------------------------------------------------------------
 L = 90.0          # lengte tent
 B = 20.0          # breedte één tent
-BT = 2 * B        # totale breedte
-PAAL_STAP = 5.0   # traveeafstand tentstructuur
+GANG = 2.0        # tussengang tussen de twee tenten
+T2 = (0.0, B)                     # tent 2 (logistiek, bar)
+T1 = (B + GANG, 2 * B + GANG)     # tent 1 (ingang, vestiaire)
+BT = 2 * B + GANG                 # totale breedte 42 m
+PAAL_STAP = 5.0   # traveeafstand tentstructuur (indicatief)
 
-STAND_B = 3.0     # standbreedte (langs de gang)
-STAND_D = 3.0     # standdiepte
-BLOK1 = (12.0, 42.0)   # x-bereik standenblok west
-BLOK2 = (46.0, 76.0)   # x-bereik standenblok oost
-DWARSGANG = (42.0, 46.0)
+STANDEN_JSON = OUT / "data" / "stands_2526.json"
 
-# y-indeling per tent A (tent B = spiegelbeeld rond y = 20)
-#   0-3 wandstands | 3-7 gang | 7-13 eilandstands (rug aan rug) | 13-17 gang | 17-20 gootstands
-RIJEN_A = [  # (y0, y1, ruglijn-y, naam)
-    (0.0, 3.0, 0.0, "wand"),
-    (7.0, 10.0, 10.0, "eiland-z"),
-    (10.0, 13.0, 10.0, "eiland-n"),
-    (17.0, 20.0, 20.0, "goot"),
+# Zones (naam, x0, y0, x1, y1, laag) – uit grondplan 25-26
+ZONES = [
+    ("INKOM", 0.0, 22.0, 5.0, 42.0, "ALG-ONTHAAL"),
+    ("VESTIAIRE", 5.0, 22.0, 14.0, 32.0, "ALG-ONTHAAL"),
+    ("", 14.0, 22.0, 20.9, 25.5, "ALG-ONTHAAL"),
+    ("CV-CHECK", 5.0, 34.0, 11.0, 42.0, "ALG-ONTHAAL"),
+    ("LANYARDS", 16.0, 34.0, 23.0, 35.2, "ALG-ONTHAAL"),
+    ("GOODIES", 26.6, 30.8, 28.2, 33.6, "ALG-ONTHAAL"),
+    ("RECRUITERS ZONE", 48.1, 22.3, 65.7, 25.6, "ALG-ZONES"),
+    ("LOADING BAY", 86.5, 22.0, 90.0, 42.0, "ALG-LOGISTIEK"),
+    ("LOGISTIEKE ZONE", 0.0, 0.0, 10.0, 20.0, "ALG-LOGISTIEK"),
+    ("BAR", 10.5, 3.9, 13.5, 15.0, "ALG-CATERING"),
+    ("LOADING BAY", 14.2, 0.0, 17.7, 20.0, "ALG-LOGISTIEK"),
+    ("CV-SCREENING", 20.6, 16.7, 27.6, 19.7, "ALG-ZONES"),
+    ("PHOTOBOOTH", 29.7, 16.7, 35.7, 19.7, "ALG-ZONES"),
+    ("RECRUITERS ZONE", 48.1, 16.5, 65.7, 19.7, "ALG-ZONES"),
 ]
-GANGEN_Y = [5.0, 15.0, 25.0, 35.0]   # aslijnen van de langsgangen (4 m breed)
 
-# Nooduitgangen: (code, wand, middenpositie, breedte, omschrijving)
+# Uitgangen: (code, wand, middenpositie, breedte, omschrijving)
+#   wand: S = y 0 (tent 2), N = y 42 (tent 1), W = x 0 (ingangszijde), O = x 90
 UITGANGEN = [
-    ("HI-A", "W", 10.0, 4.0, "Hoofdingang A"),
-    ("HI-B", "W", 30.0, 4.0, "Hoofdingang B"),
-    ("NU1", "S", 6.0, 2.4, ""),
-    ("NU2", "S", 44.0, 2.4, ""),
-    ("NU3", "S", 82.0, 2.4, ""),
-    ("NU4", "N", 6.0, 2.4, ""),
-    ("NU5", "N", 44.0, 2.4, ""),
-    ("NU6", "N", 82.0, 2.4, ""),
+    ("IN", "W", 39.5, 3.0, "Ingang"),
+    ("UIT", "W", 24.5, 3.0, "Uitgang"),
+    ("NU1", "N", 28.0, 2.4, ""),
+    ("NU2", "N", 57.5, 2.4, ""),
+    ("NU3", "S", 33.0, 2.4, ""),
+    ("NU4", "S", 57.0, 2.4, ""),
+    ("NU5", "S", 82.5, 2.4, ""),
+    ("NU6", "O", 32.0, 2.4, ""),
     ("NU7", "O", 10.0, 2.4, ""),
-    ("NU8", "O", 30.0, 2.4, ""),
+    ("NU8", "W", 10.0, 2.4, ""),
 ]
 
 # ---------------------------------------------------------------------------
@@ -84,7 +92,8 @@ LAGEN = {
     "ALG-STANDNUMMERS":       (7,   "Continuous", 18, "Standnummers", True),
     "ALG-ONTHAAL":            (3,   "Continuous", 35, "Onthaal, vestiaire, infobalie", True),
     "ALG-CATERING":           (30,  "Continuous", 35, "Bar en cateringzone", True),
-    "ALG-MEUBILAIR":          (8,   "Continuous", 18, "Statafels en meubilair", True),
+    "ALG-ZONES":              (3,   "Continuous", 25, "Recruiters zone, CV-screening, photobooth", True),
+    "ALG-LOGISTIEK":          (8,   "Continuous", 25, "Logistieke zone, loading bays, heat-units", True),
     "ALG-SANITAIR":           (4,   "Continuous", 35, "Sanitaire voorzieningen", True),
     "ALG-ZONES-TEKST":        (7,   "Continuous", 25, "Benaming zones en gangen", True),
     "ALG-MAATVOERING":        (7,    "Continuous", 18, "Maatvoering", True),
@@ -347,142 +356,129 @@ def maak_blokken(doc):
 
 
 # ---------------------------------------------------------------------------
-# Geometrie: stands
+# Geometrie: stands (posities uit grondplan Career Day 25-26)
 # ---------------------------------------------------------------------------
+import json as _json
+
+
 def stands():
-    """Lijst van stands: dict(code, x0, y0, x1, y1, rug_y)."""
+    """Lijst van stands: dict(code, x0, y0, x1, y1, tent)."""
     res = []
-    for tent, spiegel in (("A", False), ("B", True)):
-        nr = 1
-        rijen = RIJEN_A
-        for y0, y1, rug, naam in rijen:
-            if spiegel:
-                y0, y1, rug = BT - y1, BT - y0, BT - rug
-            for bx0, bx1 in (BLOK1, BLOK2):
-                n = int(round((bx1 - bx0) / STAND_B))
-                for i in range(n):
-                    x0 = bx0 + i * STAND_B
-                    res.append(dict(code=f"{tent}{nr:02d}", x0=x0, y0=y0,
-                                    x1=x0 + STAND_B, y1=y1, rug=rug, rij=naam,
-                                    tent=tent))
-                    nr += 1
+    for s in _json.loads(STANDEN_JSON.read_text()):
+        res.append(dict(code=str(s["nr"]), nr=s["nr"], x0=s["x"], y0=s["y"],
+                        x1=s["x"] + s["w"], y1=s["y"] + s["h"],
+                        tent="1" if s["tent"] == "A" else "2"))
     return res
+
+
+def bezet(x, y, marge=0.6):
+    """True als punt (x,y) in een stand of zone valt (incl. marge)."""
+    for s in stands_cache():
+        if s["x0"] - marge < x < s["x1"] + marge and s["y0"] - marge < y < s["y1"] + marge:
+            return True
+    for _, x0, y0, x1, y1, _l in ZONES:
+        if x0 - marge < x < x1 + marge and y0 - marge < y < y1 + marge:
+            return True
+    return False
+
+
+_CACHE = []
+
+
+def stands_cache():
+    if not _CACHE:
+        _CACHE.extend(stands())
+    return _CACHE
 
 
 # ---------------------------------------------------------------------------
 # Basis: tent, palen, stramien, omgeving
 # ---------------------------------------------------------------------------
 def teken_basis(msp):
-    # tenten
-    add_rect(msp, 0, 0, L, B, "BASIS-TENT")
-    add_rect(msp, 0, B, L, BT, "BASIS-TENT")
-    msp.add_line((0, B), (L, B), dxfattribs={"layer": "BASIS-TENT-KOPPELING"})
-    add_txt(msp, "TENT A  (20 m x 90 m)", (25.0, -5.0), 0.9, "BASIS-OMGEVING-TEKST")
-    add_txt(msp, "TENT B  (20 m x 90 m)", (25.0, BT + 2.2), 0.9, "BASIS-OMGEVING-TEKST")
+    add_rect(msp, 0, T2[0], L, T2[1], "BASIS-TENT")
+    add_rect(msp, 0, T1[0], L, T1[1], "BASIS-TENT")
+    # tussengang (open aan ingangszijde x 0-10 en achteraan x 85-90)
+    for y in (T2[1] + 1.0,):
+        msp.add_line((10.0, y), (85.0, y), dxfattribs={"layer": "BASIS-TENT-KOPPELING"})
+    add_txt(msp, "TUSSENGANG 2,00 m", (47.0, 21.0), 0.5, "BASIS-OMGEVING-TEKST")
+    add_txt(msp, "TENT 1  (20 m x 90 m)", (45.0, BT + 2.2), 0.9, "BASIS-OMGEVING-TEKST")
+    add_txt(msp, "TENT 2  (20 m x 90 m)", (20.0, -5.0), 0.9, "BASIS-OMGEVING-TEKST")
 
-    # staanders: langs lange zijden en goot h.o.h. 5 m, kopgevels tussenpaal
     for i in range(int(L / PAAL_STAP) + 1):
         x = i * PAAL_STAP
-        for y in (0.0, B, BT):
+        for y in (T2[0], T2[1], T1[0], T1[1]):
             ins(msp, "PAAL", (x, y), "BASIS-TENT-PALEN")
     for x in (0.0, L):
-        for y in (B / 2, B + B / 2):
+        for y in (B / 2, T1[0] + B / 2):
             ins(msp, "PAAL", (x, y), "BASIS-TENT-PALEN")
 
-    # stramien: assen 1..19 (x) en A..C (y)
+    # stramien: assen 1..19 (x) en A..D (y)
     for i in range(int(L / PAAL_STAP) + 1):
         x = i * PAAL_STAP
         msp.add_line((x, -6.5), (x, BT + 1.5), dxfattribs={"layer": "BASIS-STRAMIEN"})
         ins(msp, "STRAMIENBOL", (x, -7.4), "BASIS-STRAMIEN-TEKST")
         add_txt(msp, str(i + 1), (x, -7.4), 0.7, "BASIS-STRAMIEN-TEKST")
-    for j, (y, lbl) in enumerate(((0.0, "A"), (B, "B"), (BT, "C"))):
+    for y, lbl in ((T2[0], "A"), (T2[1], "B"), (T1[0], "C"), (T1[1], "D")):
         msp.add_line((-6.5, y), (L + 1.5, y), dxfattribs={"layer": "BASIS-STRAMIEN"})
-        ins(msp, "STRAMIENBOL", (-7.4, y), "BASIS-STRAMIEN-TEKST")
-        add_txt(msp, lbl, (-7.4, y), 0.7, "BASIS-STRAMIEN-TEKST")
+        ins(msp, "STRAMIENBOL", (-7.4 if lbl in "AD" else -9.4, y), "BASIS-STRAMIEN-TEKST")
+        add_txt(msp, lbl, (-7.4 if lbl in "AD" else -9.4, y), 0.7, "BASIS-STRAMIEN-TEKST")
 
-    # omgeving
     add_rect(msp, -15, -12, 108, 64, "BASIS-OMGEVING")
-    add_txt(msp, "TERREINGRENS (indicatief)", (-14.5, 63.2), 0.8,
+    add_txt(msp, "SINT-PIETERSPLEIN, GENT  (omgeving indicatief)", (-14.5, 63.2), 0.8,
             "BASIS-OMGEVING-TEKST", align=TextEntityAlignment.MIDDLE_LEFT)
-    # weg noordzijde (ook toegang hulpdiensten)
-    msp.add_line((-15, 44), (108, 44), dxfattribs={"layer": "BASIS-OMGEVING"})
-    msp.add_line((-15, 48), (108, 48), dxfattribs={"layer": "BASIS-OMGEVING"})
-    add_txt(msp, "TOEGANGSWEG (verhard, 4 m)", (70, 44.9), 0.7, "BASIS-OMGEVING-TEKST")
+    msp.add_line((-15, 50), (108, 50), dxfattribs={"layer": "BASIS-OMGEVING"})
+    msp.add_line((-15, 54), (108, 54), dxfattribs={"layer": "BASIS-OMGEVING"})
+    add_txt(msp, "DOORGANG PLEIN (min. 4 m vrij)", (70, 52), 0.7, "BASIS-OMGEVING-TEKST")
 
 
 # ---------------------------------------------------------------------------
 # Algemeen grondplan
 # ---------------------------------------------------------------------------
 def teken_algemeen(msp):
-    # stands
-    for s in stands():
+    for naam, x0, y0, x1, y1, laag in ZONES:
+        add_rect(msp, x0, y0, x1, y1, laag)
+        if laag in ("ALG-ZONES", "ALG-LOGISTIEK") or naam in ("CV-CHECK",):
+            h = msp.add_hatch(color=256, dxfattribs={"layer": laag})
+            h.paths.add_polyline_path(rect(x0, y0, x1, y1), is_closed=True)
+            h.set_pattern_fill("ANSI31", scale=0.06)
+            h.transparency = 0.7
+        if naam:
+            breed, hoog = x1 - x0, y1 - y0
+            rot = 90 if hoog > breed * 1.6 and breed < 5 else 0
+            hgt = 0.55 if min(breed, hoog) > 2 else 0.4
+            if naam == "RECRUITERS ZONE":
+                add_txt(msp, naam, (x0 + 0.3, (y0 + y1) / 2), 0.4, "ALG-ZONES-TEKST",
+                        align=TextEntityAlignment.MIDDLE_LEFT)
+                continue
+            add_txt(msp, naam, ((x0 + x1) / 2, (y0 + y1) / 2), hgt, "ALG-ZONES-TEKST", rot=rot)
+
+    for s in stands_cache():
         pts = rect(s["x0"], s["y0"], s["x1"], s["y1"])
         add_fill(msp, pts, "ALG-STANDS-ARCERING", transparency=0.6)
         add_rect(msp, s["x0"], s["y0"], s["x1"], s["y1"], "ALG-STANDS")
         add_txt(msp, s["code"], ((s["x0"] + s["x1"]) / 2, (s["y0"] + s["y1"]) / 2),
                 0.55, "ALG-STANDNUMMERS")
 
-    # gangen benoemen
-    for y in GANGEN_Y:
-        for xm in ((BLOK1[0] + BLOK1[1]) / 2, (BLOK2[0] + BLOK2[1]) / 2):
-            add_txt(msp, "GANG  4,00 m", (xm, y), 0.6, "ALG-ZONES-TEKST")
-    add_txt(msp, "DWARSGANG 4,00 m", (44, 17.5), 0.6, "ALG-ZONES-TEKST", rot=90)
-    add_txt(msp, "DWARSGANG 4,00 m", (44, 37.0), 0.6, "ALG-ZONES-TEKST", rot=90)
+    # sanitair en verwarming buiten (uit plan 25-26)
+    add_rect(msp, 78.4, 46.0, 86.4, 49.0, "ALG-SANITAIR")
+    add_txt(msp, "TOILETTEN", (82.4, 47.5), 0.55, "ALG-SANITAIR")
+    for x, y in ((37.7, -3.45), (69.3, -3.45), (69.3, 42.1), (15.4, 42.1)):
+        add_rect(msp, x, y, x + 3.5, y + 3.35, "ALG-LOGISTIEK")
+        add_txt(msp, "HEAT", (x + 1.75, y + 1.67), 0.45, "ALG-ZONES-TEKST")
+    add_txt(msp, "INGANG", (-2.0, 39.5), 0.7, "ALG-ZONES-TEKST", rot=90)
+    add_txt(msp, "UITGANG", (-2.0, 24.5), 0.7, "ALG-ZONES-TEKST", rot=90)
+    add_txt(msp, "Standaard stand 2 x 3 m, 30 cm van de tentwand", (55.0, 47.5), 0.5,
+            "ALG-ZONES-TEKST")
 
-    # --- onthaalzone (x 0 - 12)
-    add_txt(msp, "ONTHAAL / INKOMHAL", (6.2, 33.8), 0.6, "ALG-ZONES-TEKST")
-    # balies
-    add_rect(msp, 6.0, 13.5, 7.0, 18.5, "ALG-ONTHAAL")
-    add_rect(msp, 6.0, 21.5, 7.0, 26.5, "ALG-ONTHAAL")
-    add_txt(msp, "ONTHAALBALIE", (6.5, 16.0), 0.45, "ALG-ONTHAAL", rot=90)
-    add_txt(msp, "REGISTRATIE", (6.5, 24.0), 0.45, "ALG-ONTHAAL", rot=90)
-    # vestiaire
-    add_rect(msp, 0.0, 0.0, 4.0, 5.0, "ALG-ONTHAAL")
-    add_rect(msp, 3.0, 0.5, 3.6, 4.5, "ALG-ONTHAAL")
-    add_txt(msp, "VESTIAIRE", (1.5, 2.5), 0.45, "ALG-ONTHAAL", rot=90)
-    # EHBO-ruimte (algemeen weergegeven, symbool in noodplan)
-    add_rect(msp, 0.0, 35.0, 4.0, 40.0, "ALG-ONTHAAL")
-    add_txt(msp, "EHBO", (2.0, 38.6), 0.5, "ALG-ONTHAAL")
-    # ingangen labels
-    add_txt(msp, "INGANG", (1.8, 10.0), 0.7, "ALG-ZONES-TEKST", rot=90)
-    add_txt(msp, "INGANG", (1.8, 30.0), 0.7, "ALG-ZONES-TEKST", rot=90)
-
-    # --- cateringzone (x 76 - 90)
-    add_txt(msp, "CATERING / NETWERKZONE", (83.2, 38.0), 0.5, "ALG-ZONES-TEKST")
-    add_rect(msp, 86.0, 14.0, 87.2, 26.0, "ALG-CATERING")          # toog
-    add_rect(msp, 87.2, 14.0, 90.0, 26.0, "ALG-CATERING")          # achterbar
-    add_txt(msp, "BAR", (86.6, 20.0), 0.6, "ALG-CATERING", rot=90)
-    add_txt(msp, "achterbar /\\Pkoeling", (88.6, 22.8), 0.4, "ALG-CATERING", rot=90)
-    for x in (80.0, 83.0):
-        for y in (5.0, 9.0, 13.0, 27.0, 31.0, 35.0):
-            msp.add_circle((x, y), 0.4, dxfattribs={"layer": "ALG-MEUBILAIR"})
-    add_txt(msp, "statafels Ø 0,80 m", (81.5, 2.5), 0.4, "ALG-MEUBILAIR")
-
-    # --- sanitair (buiten, westzijde)
-    add_rect(msp, -10.5, 31.0, -7.5, 41.0, "ALG-SANITAIR")
-    add_txt(msp, "SANITAIRE UNIT", (-9.0, 36.0), 0.55, "ALG-SANITAIR", rot=90)
-    msp.add_lwpolyline([(0, 32.5), (-7.5, 32.5)], dxfattribs={"layer": "ALG-SANITAIR"})
-    msp.add_lwpolyline([(0, 34.5), (-7.5, 34.5)], dxfattribs={"layer": "ALG-SANITAIR"})
-    add_txt(msp, "overdekte loopzone", (-3.75, 33.5), 0.35, "ALG-SANITAIR")
-
-    # --- maatvoering
-    dims = []
-    dims.append(((0, -3.2), (0, 0), (L, 0), 0))
-    # ketting x
-    xs = [0, BLOK1[0], BLOK1[1], BLOK2[0], BLOK2[1], L]
-    for a, b_ in zip(xs, xs[1:]):
-        dims.append(((0, -1.6), (a, 0), (b_, 0), 0))
-    # breedte totaal + per tent
-    dims.append(((L + 6.0, 0), (L, 0), (L, BT), 90))
-    dims.append(((L + 4.0, 0), (L, 0), (L, B), 90))
-    dims.append(((L + 4.0, 0), (L, B), (L, BT), 90))
-    # ketting y in blok 2 (x = 76)
-    ys = [0, 3, 7, 13, 17, 20, 23, 27, 33, 37, 40]
-    for a, b_ in zip(ys, ys[1:]):
-        dims.append(((-4.0, 0), (0, a), (0, b_), 90))
+    dims = [((0, -3.2), (0, 0), (L, 0), 0)]
+    for base, p1, p2, ang in (
+            ((L + 6.0, 0), (L, 0), (L, BT), 90),
+            ((L + 4.0, 0), (L, T2[0]), (L, T2[1]), 90),
+            ((L + 4.0, 0), (L, T2[1]), (L, T1[0]), 90),
+            ((L + 4.0, 0), (L, T1[0]), (L, T1[1]), 90)):
+        dims.append((base, p1, p2, ang))
     for base, p1, p2, ang in dims:
-        d = msp.add_linear_dim(base=base, p1=p1, p2=p2, angle=ang,
-                               dimstyle="CAREERDAY",
+        d = msp.add_linear_dim(base=base, p1=p1, p2=p2, angle=ang, dimstyle="CAREERDAY",
                                dxfattribs={"layer": "ALG-MAATVOERING"})
         d.render()
 
@@ -490,107 +486,107 @@ def teken_algemeen(msp):
 # ---------------------------------------------------------------------------
 # Elektriciteitsplan
 # ---------------------------------------------------------------------------
-SVB = {   # naam: (positie, omschrijving)
-    "SVB-0": ((0.6, 20.0), "Algemeen: verlichting + onthaal"),
-    "SVB-1": ((11.0, 20.0), "Stands blok west (A/B 01-10, ...)"),
-    "SVB-2": ((77.0, 20.0), "Stands blok oost"),
-    "SVB-C": ((89.4, 20.0), "Catering / bar"),
-}
-HVB_POS = (93.5, 20.0)
-AGG_POS = (100.0, 20.0)
+HVB_POS = (93.5, 21.0)
+AGG_POS = (100.0, 21.0)
+N_SVB = 10
+
+
+def svb_posities():
+    """Verdeel de stands in N_SVB groepen (k-means op standcentra) en zoek per groep
+    een vrij punt in een gang nabij het zwaartepunt voor de verdeelkast (32 A)."""
+    pts = [((s["x0"] + s["x1"]) / 2, (s["y0"] + s["y1"]) / 2, s) for s in stands_cache()]
+    # startcentra: verdeeld over tent 1 en tent 2 op gelijke x-afstand
+    centra = []
+    for tent in ("1", "2"):
+        sub = sorted([p for p in pts if p[2]["tent"] == tent], key=lambda p: p[0])
+        n = N_SVB // 2
+        for k in range(n):
+            blok = sub[k * len(sub) // n:(k + 1) * len(sub) // n]
+            centra.append((sum(p[0] for p in blok) / len(blok), sum(p[1] for p in blok) / len(blok), tent))
+    for _ in range(15):
+        groepen = [[] for _ in centra]
+        for p in pts:
+            i = min((i for i, c in enumerate(centra) if c[2] == p[2]["tent"]),
+                    key=lambda i: (centra[i][0] - p[0]) ** 2 + (centra[i][1] - p[1]) ** 2)
+            groepen[i].append(p)
+        centra = [(sum(p[0] for p in g) / len(g), sum(p[1] for p in g) / len(g), c[2])
+                  if g else c for g, c in zip(groepen, centra)]
+    res = []
+    for (cx, cy, tent), g in zip(centra, groepen):
+        ty0, ty1 = T1 if tent == "1" else T2
+        best = None
+        for dx in [i * 0.5 for i in range(-16, 17)]:
+            for dy in [i * 0.5 for i in range(-16, 17)]:
+                x, y = round(cx + dx, 1), round(cy + dy, 1)
+                if not (ty0 + 0.6 < y < ty1 - 0.6 and 1 < x < 89):
+                    continue
+                if bezet(x, y, 0.9):
+                    continue
+                d = dx * dx + dy * dy
+                if best is None or d < best[0]:
+                    best = (d, x, y)
+        res.append(((best[1], best[2]), [p[2] for p in g]))
+    res.sort(key=lambda r: (r[0][1] < 21, r[0][0]))
+    return res
 
 
 def teken_elektriciteit(msp):
     lay = "ELEK-TEKST"
-    # hoofdvoeding
     ins(msp, "AGGREGAAT", AGG_POS, "ELEK-HOOFDVOEDING", rot=90)
-    add_txt(msp, "AGGREGAAT 250 kVA", (AGG_POS[0] + 2.3, 20), 0.6, lay, rot=90)
-    add_txt(msp, "(of tijdelijke netaansluiting)", (AGG_POS[0] + 3.2, 20), 0.45, lay, rot=90)
+    add_txt(msp, "AGGREGAAT / NETAANSLUITING", (AGG_POS[0] + 2.3, AGG_POS[1]), 0.5, lay, rot=90)
+    add_txt(msp, "(ELEK-doorsteek plein: te bevestigen)", (AGG_POS[0] + 3.2, AGG_POS[1]), 0.4, lay, rot=90)
     ins(msp, "HOOFDVERDEELBORD", HVB_POS, "ELEK-HOOFDVOEDING", rot=90)
-    add_txt(msp, "HVB", (HVB_POS[0], 22.0), 0.6, lay)
-    msp.add_line((AGG_POS[0] - 1.2, 20), (HVB_POS[0] + 0.4, 20),
+    add_txt(msp, "HVB 125 A", (HVB_POS[0], HVB_POS[1] + 2.0), 0.5, lay)
+    msp.add_line((AGG_POS[0] - 1.2, AGG_POS[1]), (HVB_POS[0] + 0.4, HVB_POS[1]),
                  dxfattribs={"layer": "ELEK-HOOFDVOEDING"})
-    add_txt(msp, "afstand tot tent ≥ 5 m", (AGG_POS[0], 15.5), 0.4, lay)
 
-    # voedingskabels HVB -> SVB's (bovengronds langs goot)
-    msp.add_line((HVB_POS[0] - 0.4, 20.0), (SVB["SVB-0"][0][0] + 0.25, 20.0),
+    # voeding door de tussengang (y = 21) naar elke verdeelkast
+    svbs = svb_posities()
+    xmin = min(p[0] for p, _ in svbs)
+    msp.add_line((HVB_POS[0] - 0.4, 21.0), (min(xmin, 0.8), 21.0),
                  dxfattribs={"layer": "ELEK-VOEDINGSKABELS"})
-    add_txt(msp, "voeding HVB \u2192 SVB's", (81.5, 20.3), 0.4, lay,
-            align=TextEntityAlignment.BOTTOM_CENTER)
-    add_txt(msp, "bovengronds langs goot (h \u2265 3 m)", (81.5, 19.7), 0.4, lay,
-            align=TextEntityAlignment.TOP_CENTER)
-    for naam, (pos, oms) in SVB.items():
-        rot = 90 if naam in ("SVB-0", "SVB-C") else 0
-        ins(msp, "VERDEELBORD", pos, "ELEK-VERDEELBORDEN", rot=rot)
-    add_txt(msp, "SVB-0", (1.9, 21.6), 0.5, lay)
-    add_txt(msp, "SVB-1", (10.2, 21.6), 0.5, lay)
-    add_txt(msp, "SVB-2", (77.8, 21.6), 0.5, lay)
-    add_txt(msp, "SVB-C", (89.4, 26.8), 0.5, lay)
+    add_txt(msp, "hoofdkabel 125 A door tussengang (kabelgoot / bovengronds)", (47.0, 21.55),
+            0.38, lay)
+    for i, ((x, y), groep) in enumerate(svbs, start=1):
+        naam = f"32-{i}"
+        msp.add_line((x, 21.0), (x, y), dxfattribs={"layer": "ELEK-VOEDINGSKABELS"})
+        ins(msp, "VERDEELBORD", (x, y), "ELEK-VERDEELBORDEN")
+        add_txt(msp, naam, (x, y + (0.75 if y > 21 else -0.75)), 0.45, lay)
+        for s in groep:
+            cx = (s["x0"] + s["x1"]) / 2
+            cy = (s["y0"] + s["y1"]) / 2
+            # stopcontact aan de rugzijde: kant verst van de dichtste gang ~ kant dichtst bij kast
+            ox = cx
+            oy = s["y0"] + 0.45 if y < cy else s["y1"] - 0.45
+            ins(msp, "STOPCONTACT_230V", (ox, oy), "ELEK-STOPCONTACTEN",
+                rot=0 if y < cy else 180)
+            msp.add_lwpolyline([(x, y), (x, oy), (ox, oy)],
+                               dxfattribs={"layer": "ELEK-KABELS-STANDS"})
 
-    # kabeltracés stands vanuit SVB-1 en SVB-2
-    for svb, (xa, xb) in (("SVB-1", BLOK1), ("SVB-2", BLOK2)):
-        xs = SVB[svb][0][0]
-        far = xa if svb == "SVB-2" else xb
-        sp = {"layer": "ELEK-KABELS-STANDS"}
-        # goot-ruglijn y=20
-        msp.add_line((xs, 20.0), (far, 20.0), dxfattribs=sp)
-        # vertikale verdeling langs kop blok
-        msp.add_line((xs, 0.15), (xs, BT - 0.15), dxfattribs=sp)
-        for y in (0.15, 10.0, 30.0, BT - 0.15):
-            msp.add_line((xs, y), (far, y), dxfattribs=sp)
-        # kabelbruggen over de langsgangen
-        for yg in GANGEN_Y:
-            msp.add_blockref("KABELBRUG", (xs, yg), dxfattribs={
-                "layer": "ELEK-KABELBRUGGEN", "xscale": 1.0, "yscale": 4.4})
-
-    # stopcontacten per stand, tegen de rugzijde
-    for s in stands():
-        xm = (s["x0"] + s["x1"]) / 2
-        if abs(s["rug"] - s["y0"]) < 1e-6:     # rug onderaan -> symbool naar boven
-            pos, rot = (xm, s["y0"] + 0.55), 0
-        else:                                  # rug bovenaan
-            pos, rot = (xm, s["y1"] - 0.55), 180
-        ins(msp, "STOPCONTACT_230V", pos, "ELEK-STOPCONTACTEN", rot=rot)
-
-    add_txt(msp, "standkringen SVB-1", (27.0, 5.9), 0.45, lay)
-    add_txt(msp, "standkringen SVB-2", (61.0, 5.9), 0.45, lay)
-
-    # onthaal / algemeen vanuit SVB-0
+    # algemeen: onthaal / vestiaire / CV-check / bar
     sp = {"layer": "ELEK-KABELS-STANDS"}
-    msp.add_lwpolyline([(0.3, 20.0), (0.3, 6.5)], dxfattribs=sp)
-    msp.add_lwpolyline([(0.3, 20.0), (0.3, 33.5)], dxfattribs=sp)
-    msp.add_lwpolyline([(0.6, 20.0), (5.6, 20.0), (5.6, 16.0)], dxfattribs=sp)
-    msp.add_lwpolyline([(5.6, 20.0), (5.6, 24.0)], dxfattribs=sp)
-    ins(msp, "STOPCONTACT_230V", (5.6, 16.0), "ELEK-STOPCONTACTEN", rot=90)
-    ins(msp, "STOPCONTACT_230V", (5.6, 24.0), "ELEK-STOPCONTACTEN", rot=90)
-    ins(msp, "STOPCONTACT_230V", (0.3, 6.5), "ELEK-STOPCONTACTEN", rot=-90)
-    ins(msp, "STOPCONTACT_230V", (0.3, 33.5), "ELEK-STOPCONTACTEN", rot=-90)
-    ins(msp, "KABELBRUG", (3.0, 20.0), "ELEK-KABELBRUGGEN", rot=90)
+    ins(msp, "VERDEELBORD", (1.0, 21.0), "ELEK-VERDEELBORDEN", rot=90)
+    add_txt(msp, "63-1 algemeen", (1.6, 20.3), 0.45, lay, align=TextEntityAlignment.MIDDLE_LEFT)
+    for p in ((4.5, 30.0), (8.0, 38.0), (19.5, 34.6)):
+        msp.add_lwpolyline([(1.0, 21.0), (1.0, p[1]), p], dxfattribs=sp)
+        ins(msp, "STOPCONTACT_230V", p, "ELEK-STOPCONTACTEN", rot=90)
+    for p in ((12.0, 15.5), (12.0, 3.4)):
+        msp.add_lwpolyline([(1.0, 21.0), (1.0, 18.0), (12.0, 18.0), p], dxfattribs=sp)
+        ins(msp, "CEE_400V", p, "ELEK-CEE-400V", rot=90 if p[1] > 10 else -90)
+    add_txt(msp, "bar 400 V / 32 A", (13.9, 16.4), 0.38, lay, align=TextEntityAlignment.MIDDLE_LEFT)
 
-    # catering vanuit SVB-C
-    msp.add_lwpolyline([(89.4, 19.4), (89.4, 15.5), (88.3, 15.5)], dxfattribs=sp)
-    msp.add_lwpolyline([(89.4, 20.6), (89.4, 24.5), (88.3, 24.5)], dxfattribs=sp)
-    ins(msp, "CEE_400V", (88.3, 15.5), "ELEK-CEE-400V", rot=90)
-    ins(msp, "CEE_400V", (88.3, 24.5), "ELEK-CEE-400V", rot=90)
-    msp.add_lwpolyline([(89.4, 17.5), (87.7, 17.5)], dxfattribs=sp)
-    msp.add_lwpolyline([(89.4, 22.5), (87.7, 22.5)], dxfattribs=sp)
-    ins(msp, "STOPCONTACT_230V", (87.7, 17.5), "ELEK-STOPCONTACTEN", rot=90)
-    ins(msp, "STOPCONTACT_230V", (87.7, 22.5), "ELEK-STOPCONTACTEN", rot=90)
-    add_txt(msp, "400V/32A", (88.6, 13.3), 0.35, lay)
-
-    # verlichting: armaturen h.o.h. 10 m, 4 lijnen, kringen L1-L4 vanuit SVB-0
+    # verlichting: armaturen h.o.h. 10 m, 2 lijnen per tent
     xs = [5.0 + 10.0 * i for i in range(9)]
-    for k, y in enumerate((5.0, 15.0, 25.0, 35.0), start=1):
-        msp.add_line((1.6, y), (xs[-1], y),
-                     dxfattribs={"layer": "ELEK-KABELS-VERLICHTING"})
+    for k, y in enumerate((5.0, 15.0, 27.0, 37.0), start=1):
+        msp.add_line((0.4, y), (xs[-1], y), dxfattribs={"layer": "ELEK-KABELS-VERLICHTING"})
         for x in xs:
             ins(msp, "ARMATUUR", (x, y), "ELEK-VERLICHTING")
-        add_txt(msp, f"L{k}", (xs[-1] + 1.2, y), 0.55, lay,
-                align=TextEntityAlignment.MIDDLE_LEFT)
-    msp.add_line((1.6, 5.0), (1.6, 35.0),
-                 dxfattribs={"layer": "ELEK-KABELS-VERLICHTING"})
-    msp.add_line((0.6, 20.4), (1.6, 20.4),
-                 dxfattribs={"layer": "ELEK-KABELS-VERLICHTING"})
+        add_txt(msp, f"L{k}", (xs[-1] + 1.2, y), 0.55, lay, align=TextEntityAlignment.MIDDLE_LEFT)
+    msp.add_line((0.4, 5.0), (0.4, 37.0), dxfattribs={"layer": "ELEK-KABELS-VERLICHTING"})
+
+    # verwarming: aansluiting per heat-unit
+    for x, y in ((39.45, -0.4), (71.05, -0.4), (71.05, 42.4), (17.15, 42.4)):
+        ins(msp, "STOPCONTACT_230V", (x, y), "ELEK-STOPCONTACTEN", rot=180 if y < 0 else 0)
 
 
 # ---------------------------------------------------------------------------
@@ -607,10 +603,18 @@ def uitgang_pos(wand, m, off=0.0):
     return (L - off, m), 0
 
 
+def uitgang_punt(u):
+    code, wand, m, br, oms = u
+    return uitgang_pos(wand, m, 0.0)[0]
+
+
+def in_tent(y):
+    return "1" if y > 21 else "2"
+
+
 def teken_noodplan(msp):
     lay = "NOOD-TEKST"
     for code, wand, m, br, oms in UITGANGEN:
-        # opening in tentwand aanduiden
         if wand in ("S", "N"):
             y = 0.0 if wand == "S" else BT
             msp.add_line((m - br / 2, y), (m + br / 2, y),
@@ -621,111 +625,66 @@ def teken_noodplan(msp):
                          dxfattribs={"layer": "NOOD-UITGANGEN", "lineweight": 100})
         pos, rot = uitgang_pos(wand, m, off=-1.0)
         ins(msp, "NOODUITGANG", pos, "NOOD-UITGANGEN", rot=rot)
-        tpos, _ = uitgang_pos(wand, m, off=-2.6)
-        label = f"{code}  {br:.2f} m".replace(".", ",")
-        trot = 90 if wand in ("W", "O") else 0
-        add_txt(msp, label, tpos, 0.55, lay, rot=trot)
-        # noodverlichting boven elke uitgang (binnenzijde)
-        npos, nrot = uitgang_pos(wand, m, off=0.5)
+        tpos, _ = uitgang_pos(wand, m, off=-2.6 if wand in ("S", "N") else -3.2)
+        label = (oms.upper() + " " if oms else code + "  ") + f"{br:.2f} m".replace(".", ",")
+        add_txt(msp, label, tpos, 0.5, lay, rot=90 if wand in ("W", "O") else 0)
+        npos, _ = uitgang_pos(wand, m, off=0.5)
         ins(msp, "NOODVERLICHTING", npos, "NOOD-NOODVERLICHTING",
             rot=0 if wand in ("S", "N") else 90)
 
-    # vluchtrichtingen (pijlen)
-    pijlen = []
-    for y in GANGEN_Y:
-        # blok west: splitsing op x = 27
-        pijlen += [((20.0, y), 180), ((34.0, y), 0)]
-        # blok oost: splitsing op x = 61
-        pijlen += [((54.0, y), 180), ((68.0, y), 0)]
-    # dwarsgang: naar NU2 (zuid) en NU5 (noord)
-    pijlen += [((44.0, 11.0), -90), ((44.0, 4.0), -90),
-               ((44.0, 29.0), 90), ((44.0, 36.0), 90)]
-    # onthaalzone
-    pijlen += [((9.0, 5.0), 180), ((6.0, 2.6), -90), ((9.0, 35.0), 180),
-               ((6.0, 37.4), 90), ((9.0, 15.0), 180), ((9.0, 25.0), 180),
-               ((3.5, 11.5), 180), ((3.5, 28.5), 180)]
-    # cateringzone
-    pijlen += [((79.0, 2.6), -90), ((82.0, 2.6), -90), ((79.0, 37.4), 90),
-               ((82.0, 37.4), 90), ((84.5, 10.0), 0), ((84.5, 30.0), 0)]
-    for pos, rot in pijlen:
-        ins(msp, "VLUCHTPIJL", pos, "NOOD-VLUCHTWEGEN", rot=rot)
-    # vluchtwegen in de dwarsgang en gangen: hartlijn
-    for y in GANGEN_Y:
-        msp.add_line((12.0, y), (76.0, y), dxfattribs={
-            "layer": "NOOD-VLUCHTWEGEN", "linetype": "DASHED", "lineweight": 18})
-    msp.add_line((44.0, 0.0), (44.0, BT), dxfattribs={
-        "layer": "NOOD-VLUCHTWEGEN", "linetype": "DASHED", "lineweight": 18})
+    # vluchtrichting: op een raster van vrije punten, pijl naar de dichtste uitgang
+    # in dezelfde tent (tent 2 mag ook via de tussengang-opening aan de ingang)
+    for x in [6.0 + 8.0 * i for i in range(11)]:
+        for y in (3.0, 9.0, 15.0, 26.5, 32.5, 38.5):
+            if bezet(x, y, 0.8):
+                continue
+            kand = [u for u in UITGANGEN if in_tent(uitgang_punt(u)[1] if u[1] in "WO" else
+                                                    (1 if u[1] == "S" else 41)) == in_tent(y)]
+            ux, uy = min((uitgang_punt(u) for u in kand),
+                         key=lambda p: (p[0] - x) ** 2 + (p[1] - y) ** 2)
+            hoek = math.degrees(math.atan2(uy - y, ux - x))
+            ins(msp, "VLUCHTPIJL", (x, y), "NOOD-VLUCHTWEGEN", rot=hoek, scale=0.8)
+            if (x - 6) % 16 == 0:
+                ins(msp, "NOODVERLICHTING", (x, y + 1.3), "NOOD-NOODVERLICHTING")
 
-    # noodverlichting langs gangen (aan tentstructuur)
-    for y in GANGEN_Y:
-        for x in (12.0, 27.0, 61.0, 76.0):
-            ins(msp, "NOODVERLICHTING", (x, y + 1.2), "NOOD-NOODVERLICHTING")
-    for y in (10.0, 20.0, 30.0):
-        ins(msp, "NOODVERLICHTING", (44.0, y), "NOOD-NOODVERLICHTING", rot=90)
-
-    # brandblussers: bij elke uitgang (binnen, naast opening), SVB's, bar, aggregaat
-    blussers = []
+    # blussers: naast elke uitgang, aan elke verdeelkast, bar, HVB
     for code, wand, m, br, oms in UITGANGEN:
         p, _ = uitgang_pos(wand, m, off=0.6)
-        if wand in ("S", "N"):
-            p = (m + br / 2 + 0.6, p[1])
-        else:
-            p = (p[0], m + br / 2 + 0.6)
-        blussers.append(p)
-    blussers += [(11.0, 21.2), (77.0, 18.8), (1.4, 18.0), (44.0, 21.2)]
-    for p in blussers:
+        p = (m + br / 2 + 0.6, p[1]) if wand in ("S", "N") else (p[0], m + br / 2 + 0.6)
         ins(msp, "BLUSSER", p, "NOOD-BLUSMIDDELEN")
-    ins(msp, "BLUSSER", (88.5, 27.2), "NOOD-BLUSMIDDELEN")
-    ins(msp, "BLUSDEKEN", (88.5, 12.8), "NOOD-BLUSMIDDELEN")
-    add_txt(msp, "blusdeken", (88.5, 12.0), 0.35, lay)
-    ins(msp, "BLUSSER", (96.5, 24.0), "NOOD-BLUSMIDDELEN")
-    add_txt(msp, "CO₂ 5 kg", (96.5, 25.0), 0.35, lay)
+    for (x, y), _g in svb_posities():
+        ins(msp, "BLUSSER", (x + 0.9, y), "NOOD-BLUSMIDDELEN")
+    ins(msp, "BLUSDEKEN", (12.0, 16.0), "NOOD-BLUSMIDDELEN")
+    ins(msp, "BLUSSER", (12.0, 2.9), "NOOD-BLUSMIDDELEN")
+    ins(msp, "BLUSSER", (96.5, 24.5), "NOOD-BLUSMIDDELEN")
+    add_txt(msp, "CO₂ 5 kg", (96.5, 25.5), 0.35, lay)
 
-    # hoofdschakelaar
-    ins(msp, "NOODSTOP", (HVB_POS[0], 18.0), "NOOD-HOOFDSCHAKELAAR")
-    add_txt(msp, "HOOFDSCHAKELAAR", (HVB_POS[0] + 0.0, 16.9), 0.4, lay)
-    add_txt(msp, "AGGREGAAT", (AGG_POS[0], 20), 0.6, lay, rot=90)
-    add_rect(msp, AGG_POS[0] - 1.2, 17.0, AGG_POS[0] + 1.2, 23.0,
-             "NOOD-HOOFDSCHAKELAAR")
+    ins(msp, "NOODSTOP", (HVB_POS[0], 19.0), "NOOD-HOOFDSCHAKELAAR")
+    add_txt(msp, "HOOFDSCHAKELAAR", (HVB_POS[0], 17.9), 0.4, lay)
 
-    # EHBO + AED + veiligheidspost
-    ins(msp, "EHBO", (2.0, 37.0), "NOOD-EHBO", scale=1.4)
-    add_txt(msp, "EHBO-POST", (2.0, 35.6), 0.4, lay)
-    ins(msp, "AED", (7.6, 20.0), "NOOD-EHBO")
-    add_txt(msp, "AED", (8.6, 20.0), 0.4, lay, align=TextEntityAlignment.MIDDLE_LEFT)
-    add_txt(msp, "VEILIGHEIDSCOÖRDINATOR", (7.6, 12.6), 0.35, lay)
-    add_txt(msp, "@ onthaalbalie", (7.6, 12.0), 0.35, lay)
+    ins(msp, "EHBO", (2.5, 33.5), "NOOD-EHBO", scale=1.4)
+    add_txt(msp, "EHBO-POST", (2.5, 32.2), 0.4, lay)
+    ins(msp, "AED", (2.5, 36.5), "NOOD-EHBO")
+    add_txt(msp, "AED", (3.4, 36.5), 0.4, lay, align=TextEntityAlignment.MIDDLE_LEFT)
+    add_txt(msp, "VEILIGHEIDSCOÖRDINATOR @ INKOM", (2.5, 28.0), 0.35, lay, rot=90)
 
-    # verzamelplaats
-    add_rect(msp, 32.0, 51.0, 56.0, 61.0, "NOOD-VERZAMELPLAATS")
-    ins(msp, "VERZAMELPLAATS", (44.0, 56.5), "NOOD-VERZAMELPLAATS")
-    add_txt(msp, "VERZAMELPLAATS", (44.0, 59.6), 0.8, lay)
-    add_txt(msp, "± 240 m²", (44.0, 52.3), 0.5, lay)
-    # route naar verzamelplaats
-    for x in (6.0, 44.0, 82.0):
-        msp.add_lwpolyline([(x, BT + 2.0), (x, 43.5)], dxfattribs={
-            "layer": "NOOD-VLUCHTWEGEN", "linetype": "DASHED"})
-    msp.add_lwpolyline([(6.0, 49.0), (6.0, 50.0), (32.0, 56.0)],
+    add_rect(msp, 32.0, 56.0, 56.0, 63.0, "NOOD-VERZAMELPLAATS")
+    ins(msp, "VERZAMELPLAATS", (44.0, 59.5), "NOOD-VERZAMELPLAATS")
+    add_txt(msp, "VERZAMELPLAATS (positie i.o.m. stad Gent)", (44.0, 62.3), 0.6, lay)
+    for x in (28.0, 57.5):
+        msp.add_lwpolyline([(x, BT + 2.0), (x, 49.0), (44.0, 56.0)],
+                           dxfattribs={"layer": "NOOD-VLUCHTWEGEN", "linetype": "DASHED"})
+    msp.add_lwpolyline([(-3.5, 24.5), (-12.0, 24.5), (-12.0, 49.0), (32.0, 59.5)],
                        dxfattribs={"layer": "NOOD-VLUCHTWEGEN", "linetype": "DASHED"})
-    msp.add_lwpolyline([(82.0, 49.0), (82.0, 50.0), (56.0, 56.0)],
+    msp.add_lwpolyline([(33.0, -2.0), (33.0, -9.0), (-12.0, -9.0), (-12.0, 24.5)],
                        dxfattribs={"layer": "NOOD-VLUCHTWEGEN", "linetype": "DASHED"})
-    msp.add_lwpolyline([(44.0, 49.0), (44.0, 51.0)],
-                       dxfattribs={"layer": "NOOD-VLUCHTWEGEN", "linetype": "DASHED"})
-    add_txt(msp, "vanuit zuidzijde: rond tent via westkant", (-12.0, -9.0), 0.5, lay,
-            align=TextEntityAlignment.MIDDLE_LEFT)
-    msp.add_lwpolyline([(6.0, -2.0), (6.0, -4.0), (-13.0, -4.0), (-13.0, 46.0)],
-                       dxfattribs={"layer": "NOOD-VLUCHTWEGEN", "linetype": "DASHED"})
-    msp.add_lwpolyline([(44.0, -2.0), (44.0, -4.0)],
-                       dxfattribs={"layer": "NOOD-VLUCHTWEGEN", "linetype": "DASHED"})
-    msp.add_lwpolyline([(82.0, -2.0), (82.0, -4.0), (44.0, -4.0)],
+    msp.add_lwpolyline([(82.5, -2.0), (82.5, -9.0), (33.0, -9.0)],
                        dxfattribs={"layer": "NOOD-VLUCHTWEGEN", "linetype": "DASHED"})
 
-    # hulpdiensten
-    msp.add_lwpolyline([(-15, 46), (108, 46)], dxfattribs={"layer": "NOOD-HULPDIENSTEN"})
-    add_txt(msp, "TOEGANG HULPDIENSTEN – VRIJ HOUDEN (min. 4 m)", (20.0, 46.6), 0.6,
+    msp.add_lwpolyline([(-15, 52), (108, 52)], dxfattribs={"layer": "NOOD-HULPDIENSTEN"})
+    add_txt(msp, "TOEGANG HULPDIENSTEN – VRIJ HOUDEN (min. 4 m)", (20.0, 52.6), 0.6,
             lay, align=TextEntityAlignment.BOTTOM_CENTER)
-    ins(msp, "HYDRANT", (-12.0, 49.5), "NOOD-HULPDIENSTEN")
-    add_txt(msp, "hydrant (positie te bevestigen)", (-11.2, 49.5), 0.4, lay,
+    add_txt(msp, "brandkraan brandweer: zie situatieplan stad Gent", (-14.0, 48.0), 0.4, lay,
             align=TextEntityAlignment.MIDDLE_LEFT)
 
 
@@ -740,25 +699,25 @@ MODEL_CENTER = (46.5, 26.0)
 
 def legende_items(plan):
     alg = [
-        ("rect", "ALG-STANDS", "Stand 3 x 3 m met standnummer"),
-        ("rect", "ALG-ONTHAAL", "Onthaal / vestiaire / EHBO-ruimte"),
-        ("rect", "ALG-CATERING", "Bar / catering"),
-        ("circ", "ALG-MEUBILAIR", "Statafel"),
-        ("rect", "ALG-SANITAIR", "Sanitaire unit"),
-        ("PAAL", "BASIS-TENT-PALEN", "Staander tentstructuur"),
-        ("line", "BASIS-TENT-KOPPELING", "Koppeling / goot tent A - B"),
+        ("rect", "ALG-STANDS", "Stand 2 x 3 m met standnummer"),
+        ("rect", "ALG-ONTHAAL", "Inkom, vestiaire, CV-check, lanyards, goodies"),
+        ("rect", "ALG-ZONES", "Recruiters zone, CV-screening, photobooth"),
+        ("rect", "ALG-LOGISTIEK", "Logistieke zone, loading bay, heat-unit"),
+        ("rect", "ALG-CATERING", "Bar"),
+        ("rect", "ALG-SANITAIR", "Toiletten"),
+        ("PAAL", "BASIS-TENT-PALEN", "Staander tentstructuur (indicatief)"),
+        ("line", "BASIS-TENT-KOPPELING", "Tussengang tent 1 - tent 2"),
         ("line", "BASIS-STRAMIEN", "Stramienas"),
     ]
     elek = [
-        ("HOOFDVERDEELBORD", "ELEK-HOOFDVOEDING", "Hoofdverdeelbord (HVB)"),
-        ("VERDEELBORD", "ELEK-VERDEELBORDEN", "Subverdeelbord (SVB) met differentieel 30 mA"),
-        ("line", "ELEK-VOEDINGSKABELS", "Voedingskabel HVB-SVB (bovengronds)"),
+        ("HOOFDVERDEELBORD", "ELEK-HOOFDVOEDING", "Hoofdverdeelbord 125 A (HVB)"),
+        ("VERDEELBORD", "ELEK-VERDEELBORDEN", "Verdeelkast 32 A / 63 A, differentieel 30 mA"),
+        ("line", "ELEK-VOEDINGSKABELS", "Voedingskabel HVB - verdeelkast (tussengang)"),
         ("line", "ELEK-KABELS-STANDS", "Kabeltracé vloer (stands / onthaal)"),
         ("STOPCONTACT_230V", "ELEK-STOPCONTACTEN", "Stopcontact 230 V / 16 A (1 per stand)"),
         ("CEE_400V", "ELEK-CEE-400V", "CEE-contactdoos 400 V / 32 A"),
         ("ARMATUUR", "ELEK-VERLICHTING", "LED-armatuur (± 400 W) aan tentstructuur"),
         ("line", "ELEK-KABELS-VERLICHTING", "Verlichtingskring L1-L4 (bovengronds)"),
-        ("KABELBRUG", "ELEK-KABELBRUGGEN", "Kabelbrug over looppad"),
     ]
     nood = [
         ("NOODUITGANG", "NOOD-UITGANGEN", "Nooduitgang / ingang (vrije breedte)"),
@@ -771,7 +730,6 @@ def legende_items(plan):
         ("AED", "NOOD-EHBO", "AED-toestel"),
         ("NOODSTOP", "NOOD-HOOFDSCHAKELAAR", "Hoofdschakelaar elektriciteit"),
         ("VERZAMELPLAATS", "NOOD-VERZAMELPLAATS", "Verzamelplaats"),
-        ("HYDRANT", "NOOD-HULPDIENSTEN", "Hydrant"),
         ("line", "NOOD-HULPDIENSTEN", "Toegangsweg hulpdiensten"),
     ]
     return {"ALG": alg, "ELEK": alg[:1] + elek, "NOOD": alg[:1] + nood}[plan]
@@ -780,30 +738,30 @@ def legende_items(plan):
 NOTITIES = {
     "ALG": (
         "{\\fArial|b1;ALGEMENE NOTITIES}\\P"
-        "1. Twee tenten van 20 m x 90 m, lange zijden gekoppeld: totale vloeroppervlakte 3.600 m².\\P"
-        "2. 160 stands van 3 x 3 m (80 per tent): wandstands, eilandstands rug-aan-rug en gootstands.\\P"
-        "3. Langsgangen en dwarsgang min. 4,00 m vrije breedte; geen materiaal in de gangen.\\P"
-        "4. Maatvoering in meter. Oorsprong (0,0) = zuidwestelijke hoek tent A (stramien 1/A).\\P"
-        "5. Standnummering: A01-A80 (tent A), B01-B80 (tent B), per rij van west naar oost.\\P"
+        "1. Twee tenten van 20 m x 90 m naast elkaar met tussengang van 2,00 m (open aan beide koppen).\\P"
+        "2. Indeling en 128 standposities overgenomen van grondplan Career Day 25-26 (stad Gent, 17/02/2026).\\P"
+        "3. Standaard stand 2 x 3 m op 30 cm van de tentwand; standnummers 1-73 tent 1, 74-128 tent 2.\\P"
+        "4. Maatvoering in meter. Oorsprong (0,0) = hoek tent 2 aan de ingangszijde (stramien 1/A).\\P"
+        "5. Ventilatieroosters ondergrondse parking en vaste paaltjes op het plein altijd vrijhouden.\\P"
         "6. Posities staanders indicatief (h.o.h. 5 m) – te controleren met plan tentverhuurder."
     ),
     "ELEK": (
         "{\\fArial|b1;ELEKTRISCHE NOTITIES}\\P"
         "1. Installatie volgens AREI; keuring door erkend organisme vóór openstelling.\\P"
-        "2. Elke SVB met differentieelschakelaar 30 mA; elke stand op eigen kring 16 A.\\P"
-        "3. Vloerkabels langs ruglijn stands (achter standwanden); op looppaden steeds kabelbrug.\\P"
-        "4. Voedingskabels HVB→SVB bovengronds langs goot, min. 3 m hoog, mechanisch bevestigd.\\P"
-        "5. Indicatieve vermogensbalans: stands 160 x 1,5 kW x 0,6 = 144 kW | verlichting 36 x 0,4 = 14 kW |\\P"
-        "    catering 2 x 22 kW x 0,8 = 35 kW | onthaal 5 kW  →  ± 200 kW  →  aggregaat 250 kVA.\\P"
+        "2. 10 verdeelkasten 32 A (32-1 ... 32-10) voor de stands + 63-1 algemeen; elke kast differentieel 30 mA.\\P"
+        "3. Groepering stands per kast automatisch op afstand; kabels langs ruglijn stands, op looppaden kabelbrug.\\P"
+        "4. Hoofdkabel 125 A door de tussengang; aansluiting via ELEK-doorsteek plein of aggregaat.\\P"
+        "5. Indicatieve vermogensbalans: stands 128 x 1,5 kW x 0,6 = 115 kW | verlichting 36 x 0,4 = 14 kW |\\P"
+        "    bar 2 x 22 kW x 0,8 = 35 kW | heat-units 4 x 3 kW = 12 kW | onthaal 5 kW  →  ± 180 kW.\\P"
         "6. Kabelsecties en beveiligingen te bepalen door de installateur."
     ),
     "NOOD": (
         "{\\fArial|b1;NOODPLAN – NOTITIES}\\P"
-        "1. 2 hoofdingangen (2 x 4,00 m) + 8 nooduitgangen (8 x 2,40 m): totale uitgangsbreedte 27,2 m.\\P"
+        "1. Ingang + uitgang (2 x 3,00 m) + 8 nooduitgangen (8 x 2,40 m): totale uitgangsbreedte 25,2 m.\\P"
         "2. Uitgangen tijdens het event nooit afsluiten; tentzeilen opgerold/vastgezet, drempelvrij.\\P"
-        "3. Evacuatie: volg pijlen naar dichtstbijzijnde uitgang, daarna naar VERZAMELPLAATS (noordzijde).\\P"
-        "4. Bij brand/incident: alarm via veiligheidscoördinator (onthaalbalie) – bel 112.\\P"
-        "5. Elektriciteit uitschakelen via hoofdschakelaar aan HVB (oostzijde).\\P"
+        "3. Evacuatie: volg pijlen naar dichtstbijzijnde uitgang, daarna naar de VERZAMELPLAATS op het plein.\\P"
+        "4. Bij brand/incident: alarm via veiligheidscoördinator (inkom) – bel 112.\\P"
+        "5. Elektriciteit uitschakelen via hoofdschakelaar aan HVB (achterzijde tenten).\\P"
         "6. Max. bezetting, noodverlichting en blusmiddelen af te stemmen met brandweer/preventiedienst."
     ),
 }
@@ -839,7 +797,7 @@ def teken_layout(doc, plan, nr):
         if g != plan:
             bevroren += GROEPEN[g]
     if plan != "ALG":
-        bevroren += ["ALG-MAATVOERING", "ALG-MEUBILAIR"]
+        bevroren += ["ALG-MAATVOERING"]
         if plan == "NOOD":
             bevroren += ["ALG-SANITAIR"]
     bevroren = sorted(set(bevroren) - set(GROEPEN[plan]))
@@ -908,21 +866,21 @@ def teken_layout(doc, plan, nr):
         psp.add_line((x0, r), (x1, r), dxfattribs={"layer": K})
     xm = (x0 + x1) / 2
     psp.add_line((xm, 15.0), (xm, 65.0), dxfattribs={"layer": K})
-    add_txt(psp, "CAREERDAY", (x0 + 5, 135.0), 7.0, K,
+    add_txt(psp, "CAREER DAY 26\u201327", (x0 + 5, 135.0), 7.0, K,
             align=TextEntityAlignment.MIDDLE_LEFT)
-    add_txt(psp, "Tentconfiguratie 2 x (20 m x 90 m)", (x0 + 5, 128.5), 2.8, K,
+    add_txt(psp, "Sint-Pietersplein Gent \u2013 2 x (20 m x 90 m)", (x0 + 5, 128.5), 2.8, K,
             align=TextEntityAlignment.MIDDLE_LEFT)
     add_txt(psp, "PLAN", (x0 + 3, 121.5), 2.0, K, align=TextEntityAlignment.MIDDLE_LEFT)
     add_txt(psp, TITELS[plan], (x0 + 5, 113.0), 5.5, K,
             align=TextEntityAlignment.MIDDLE_LEFT)
     add_txt(psp, "INHOUD", (x0 + 3, 101.5), 2.0, K, align=TextEntityAlignment.MIDDLE_LEFT)
-    inhoud = {"ALG": "Inplanting stands, onthaal, catering, sanitair",
-              "ELEK": "Voeding, verdeelborden, stopcontacten, verlichting",
+    inhoud = {"ALG": "128 stands, inkom, vestiaire, bar, logistiek",
+              "ELEK": "Voeding, verdeelkasten, stopcontacten, verlichting",
               "NOOD": "Uitgangen, vluchtwegen, blusmiddelen, EHBO"}[plan]
     add_txt(psp, inhoud, (x0 + 5, 93.0), 3.0, K, align=TextEntityAlignment.MIDDLE_LEFT)
     add_txt(psp, "PROJECT / LOCATIE", (x0 + 3, 81.5), 2.0, K,
             align=TextEntityAlignment.MIDDLE_LEFT)
-    add_txt(psp, "Careerday – ...........................", (x0 + 5, 73.0), 3.0, K,
+    add_txt(psp, "Sint-Pietersplein, 9000 Gent", (x0 + 5, 73.0), 3.0, K,
             align=TextEntityAlignment.MIDDLE_LEFT)
     cellen = [("SCHAAL", "1:200", x0, 65.0), ("FORMAAT", "A1 liggend", xm, 65.0),
               ("DATUM", "17/11/2026", x0, 50.0), ("BLAD", f"{nr} / 3", xm, 50.0),
