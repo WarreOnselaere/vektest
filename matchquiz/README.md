@@ -1,6 +1,6 @@
 # Matchquiz – Career Day
 
-Studenten doen een korte quiz (11 vragen, ± 2 minuten) en krijgen hun **top 5 bedrijven** met standnummer
+Studenten doen een korte quiz (12 vragen, ± 2 minuten) en krijgen hun **top 5 bedrijven** met standnummer
 en een route op het grondplan. Bedrijven vullen vooraf **dezelfde vragen** in over hun bedrijf.
 Alles komt samen in één Google Sheet.
 
